@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
+import { Geist, Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -38,7 +40,10 @@ export default function RootLayout({
         manrope.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }
