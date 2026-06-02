@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, LayoutDashboard, CircleUser, User, LogOut, Loader2} from "lucide-react";
@@ -47,6 +47,11 @@ function AuthFallback() {
 function AuthSection() {
   const { data: user, isLoading } = useUser();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     logout(undefined, {
@@ -55,7 +60,7 @@ function AuthSection() {
     });
   };
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return <AuthFallback />;
   }
 
@@ -110,6 +115,13 @@ function MobileNav() {
   const { data: user, isLoading } = useUser();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isAuthLoading = !mounted || isLoading;
 
   const handleLogout = () => {
     logout(undefined, {
@@ -124,7 +136,7 @@ function MobileNav() {
   return (
     <div className="flex items-center gap-2 md:hidden">
       {/* Quick Dashboard Icon if Logged In (Left of Hamburger) */}
-      {user && !isLoading && (
+      {user && !isAuthLoading && (
         <Link href="/dashboard" aria-label="Dashboard">
           <Button variant="ghost" size="icon" className="rounded-full">
             <LayoutDashboard className="h-5 w-5 text-foreground" />
@@ -175,7 +187,7 @@ function MobileNav() {
             </div>
 
             {/* Dashboard and Profile if logged in */}
-            {user && !isLoading && (
+            {user && !isAuthLoading && (
               <div className="mt-6 pt-6 border-t border-border/40 mr-5 flex flex-col gap-4">
                 <p className="text-sm font-semibold tracking-wide text-muted-foreground uppercase mb-1">
                   Welcome, {user.fullName?.split(' ')[0] || "User"}
@@ -202,7 +214,7 @@ function MobileNav() {
 
           {/* Bottom Auth Section */}
           <div className="flex justify-center items-center gap-3 py-10">
-            {isLoading ? (
+            {isAuthLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : user ? (
               <Button 
@@ -230,8 +242,8 @@ function MobileNav() {
 // ─── Main Navbar ───────────────────────────────────────────────────────────
 export default function Navbar() {
   return (
-    <header className="w-full bg-background border-b border-border/40">
-      <nav className="mx-auto grid w-full max-w-(--space-container-max) grid-cols-12 items-center gap-3 px-(--space-margin-mobile) py-(--space-stack-md) md:px-(--space-margin-desktop)">
+    <header className="w-full bg-background">
+      <nav className="mx-auto grid w-full max-w-7xl grid-cols-12 items-center gap-3 px-4 py-4 md:px-10">
         
         {/* Logo */}
         <section className="col-span-8 flex items-center md:col-span-2">
@@ -247,8 +259,8 @@ export default function Navbar() {
         </section>
 
         {/* Desktop Nav Links */}
-        <section className="hidden md:col-span-7 md:flex md:items-center">
-          <NavigationMenu className="w-full justify-start" viewport={false}>
+        <section className="hidden md:col-span-7 md:flex md:items-center md:justify-center">
+          <NavigationMenu className="w-full justify-start " viewport={false}>
             <NavigationMenuList className="justify-start gap-2">
               {navItems.map((item) => (
                 <NavigationMenuItem key={item.href}>
