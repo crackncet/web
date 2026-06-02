@@ -7,6 +7,8 @@
 - Prefer semantic tokens from the shadcn preset (e.g., `--background`, `--foreground`, `--primary`) over raw palette usage.
 - Keep typography consistent with the system; change only when explicitly requested.
 - When adding components, prefer shadcn primitives and extend them instead of creating new base styles.
+- Follow a 12-column grid layout system for all responsive page structures.
+- Use a mobile-first approach with breakpoints in this order: `<sm`, `sm+`, `md+`, `lg+`.
 
 ## Folder Structure & Ownership
 
@@ -91,6 +93,16 @@
 - Ensure route folders contain only what is used for that route.
 - Keep naming consistent: `*.api.ts`, `*.queries.ts`, `*.store.ts`.
 - Update `/graphify` after any `web` changes.
+
+## Mobile-First 12-Grid UI Process
+
+1. Start with a single-column layout (`<sm`) and validate content priority.
+2. Map content blocks to the 12-column grid and define column spans.
+3. Add `sm+` rules to introduce two-column groupings where needed.
+4. Add `md+` rules to align sidebars, tables, and filters to the grid.
+5. Add `lg+` rules for max-width, gutters, and dense dashboards.
+6. Keep spacing and gutters aligned with design tokens; no ad-hoc spacing.
+7. Verify each breakpoint for overflow, alignment, and legibility.
 
 ## Dynamic Metadata (SEO) Rules
 
