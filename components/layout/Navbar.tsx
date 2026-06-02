@@ -241,8 +241,20 @@ function MobileNav() {
 
 // ─── Main Navbar ───────────────────────────────────────────────────────────
 export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    // Initial check
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className="w-full bg-background">
+    <header className={`fixed top-0 left-0 z-50 w-full transition-colors duration-300 ${isScrolled ? "bg-background" : "bg-transparent"}`}>
       <nav className="mx-auto grid w-full max-w-7xl grid-cols-12 items-center gap-3 px-4 py-4 md:px-10">
         
         {/* Logo */}

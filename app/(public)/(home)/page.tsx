@@ -1,9 +1,11 @@
-import HeroSection from "./_components/HeroSection";
+import LargeHeroSection from "./_components/LargeHeroSection";
+import SmallHeroSection from "./_components/SmallHeroSection";
 
 export default function Home() {
   return (
     <>
-      <HeroSection />
+      <LargeHeroSection />
+      <SmallHeroSection />
     </>
   )
 }

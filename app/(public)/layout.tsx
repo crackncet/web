@@ -1,5 +1,13 @@
 import Navbar from "@/components/layout/Navbar";
 
-export default function PublicLayout() {
-  return <Navbar />;
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-dvh">
+        {children}
+      </main>
+      
+    </>
+  )
 }
