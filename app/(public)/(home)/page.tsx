@@ -1,11 +1,18 @@
-import LargeHeroSection from "./_components/LargeHeroSection";
-import SmallHeroSection from "./_components/SmallHeroSection";
+"use client";
+
+import HeroSection from "./_components/HeroSection";
+import FeaturedCourseSection from "./_components/FeaturedCourseSection";
+import ResultSection from "./_components/ResultSection";
+import { useFeaturedCourses } from "./_queries/courses.queries";
 
 export default function Home() {
+  const { data: courses = [], isLoading } = useFeaturedCourses();
+
   return (
     <>
-      <LargeHeroSection />
-      <SmallHeroSection />
+      <HeroSection />
+      <FeaturedCourseSection courses={courses} isLoading={isLoading} />
+      <ResultSection />
     </>
-  )
+  );
 }
