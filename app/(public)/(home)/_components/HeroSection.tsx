@@ -3,6 +3,7 @@
 import React, { SVGProps } from "react";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface LogoProps extends SVGProps<SVGSVGElement> {}
 
@@ -217,32 +218,40 @@ export default function HeroSection() {
     <section className="relative w-full min-h-[90vh] flex flex-col justify-between bg-gradient-to-b from-background via-slate-50/20 to-background dark:from-background dark:via-slate-950/10 dark:to-background overflow-hidden py-8 md:py-12">
       {/* Background Drawings - Responsive placeholders */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-30 dark:opacity-5 transition-opacity duration-500">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/hero/education_hero_bg_mobile.png"
           alt="Educational Pattern Mobile"
-          className="w-full h-full object-cover md:hidden"
+          fill
+          sizes="100vw"
+          priority
+          className="object-contain md:hidden"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/hero/education_hero_bg_desktop.png"
           alt="Educational Pattern Desktop"
-          className="w-full h-full object-cover hidden md:block"
+          fill
+          sizes="100vw"
+          priority
+          className="object-contain hidden md:block"
         />
       </div>
 
       {/* Top logo display */}
       <div className="relative z-10 w-full flex justify-center mb-8 md:mb-12 select-none">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/logo-light.png"
           alt="CrackNCET Logo"
+          width={224}
+          height={64}
+          priority
           className="h-12 sm:h-16 w-auto dark:hidden transition-all duration-300"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/logo-dark.png"
           alt="CrackNCET Logo"
+          width={224}
+          height={64}
+          priority
           className="h-12 sm:h-16 w-auto hidden dark:block transition-all duration-300"
         />
       </div>
@@ -270,7 +279,7 @@ export default function HeroSection() {
           <div className="absolute inset-0 bg-primary/15 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
           <Link href="/courses">
             <button
-              className="relative flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200"
+              className="relative flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
             >
               <span>Explore Courses</span>
               <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />

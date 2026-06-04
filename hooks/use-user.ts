@@ -60,8 +60,9 @@ export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 // ============================================================================
 
 export interface LoginResponse {
-  userId: string;
+  userId?: string;
   fullName: string;
+  email?: string;
   profileImage: string | null;
 }
 

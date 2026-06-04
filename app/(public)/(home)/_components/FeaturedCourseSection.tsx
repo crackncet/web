@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Calendar, ArrowRight, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { FeaturedCourse } from "../_api/courses.api";
 import Link from "next/link";
+import { RetroCard } from "@/components/ui/retro-card";
+import Image from "next/image";
 
 const DUMMY_COURSES: FeaturedCourse[] = [
   {
@@ -120,7 +122,7 @@ export default function FeaturedCourseSection({
   }
 
   return (
-    <section className="relative w-full py-16 md:py-24 bg-gradient-to-b from-slate-50/30 to-background dark:from-slate-950/10 overflow-hidden">
+    <section className="relative w-full py-8 md:py-12 bg-gradient-to-b from-slate-50/30 to-background dark:from-slate-950/10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
@@ -187,20 +189,16 @@ export default function FeaturedCourseSection({
                     style={{ width: `${100 / visibleCount}%` }}
                     className="shrink-0 px-3 md:px-4 py-4 flex"
                   >
-                    <div className="relative group w-full flex">
-                      {/* Hand-drawn offset shadow */}
-                      <div className="absolute inset-0 bg-primary/10 dark:bg-primary/5 rounded-[24px] border-2 border-slate-900 dark:border-slate-100 translate-x-2 translate-y-2 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 pointer-events-none" />
-
-                      {/* Main Course Card */}
-                      <div className="relative flex flex-col w-full bg-background border-2 border-slate-900 dark:border-slate-100 rounded-[24px] overflow-hidden transition-all duration-300">
+                    <RetroCard shadowClassName="bg-primary/10 dark:bg-primary/5">
                         {/* Banner Image or Gradient Fallback */}
                         <div className="relative w-full aspect-video border-b-2 border-slate-900 dark:border-slate-100 bg-gradient-to-tr from-violet-600 via-indigo-600 to-primary flex items-center justify-center overflow-hidden">
                           {course.banner ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={course.banner}
                               alt={course.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
@@ -253,15 +251,14 @@ export default function FeaturedCourseSection({
                             </div>
 
                             <Link href={`/courses/${course.id}`}>
-                              <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground font-black text-2xs md:text-xs uppercase border-2 border-slate-900 dark:border-slate-950 rounded-xl hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all duration-200">
+                              <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground font-black text-2xs md:text-xs uppercase border-2 border-slate-900 dark:border-slate-950 rounded-xl hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all duration-200 cursor-pointer">
                                 <span>Explore</span>
                                 <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5" />
                               </button>
                             </Link>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                      </RetroCard>
                   </div>
                 );
               })}

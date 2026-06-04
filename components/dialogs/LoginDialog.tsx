@@ -27,8 +27,20 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function LoginDialog() {
-  const [open, setOpen] = useState(false);
+export default function LoginDialog({
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  trigger,
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? controlledOnOpenChange : setUncontrolledOpen;
+
   const [mode, setMode] = useState<"LOGIN" | "FORGOT_PASSWORD">("LOGIN");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -55,7 +67,7 @@ export default function LoginDialog() {
     login(data, {
       onSuccess: () => {
         toast.success("Welcome back!");
-        setOpen(false);
+        setOpen?.(false);
         loginForm.reset();
       },
       onError: (error) => {
@@ -78,7 +90,7 @@ export default function LoginDialog() {
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
+    setOpen?.(newOpen);
     if (!newOpen) {
       setTimeout(() => {
         setMode("LOGIN");
@@ -90,9 +102,11 @@ export default function LoginDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="default">Login</Button>
-      </DialogTrigger>
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || <Button variant="default">Login</Button>}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[400px]">
         {mode === "LOGIN" ? (
           <>
