@@ -62,13 +62,17 @@ function getQueryClient() {
   return browserQueryClient;
 }
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 // ─── Provider ────────────────────────────────────────────────────────────────
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <TooltipProvider delayDuration={0}>
+        {children}
+      </TooltipProvider>
       {process.env.NODE_ENV === "development" ? (
         <ReactQueryDevtools initialIsOpen={false} />
       ) : null}
