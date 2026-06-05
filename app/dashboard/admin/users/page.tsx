@@ -39,7 +39,7 @@ export default function UsersAdminPage() {
         <div className="flex flex-col">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider select-none">
-            <span>Members</span>
+            <span>ADMINISTRATION</span>
             <span className="text-muted-foreground/30">/</span>
             <span className="text-primary/90">Users</span>
           </div>

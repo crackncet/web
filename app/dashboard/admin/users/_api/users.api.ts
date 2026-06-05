@@ -65,3 +65,10 @@ export async function toggleUserStatus(userId: string) {
   );
   return response.data;
 }
+
+export async function promoteToTeamMember(email: string) {
+  const response = await apiClient.post<ApiSuccessResponse<any>>("/staffs/team-members", {
+    email,
+  });
+  return response.data;
+}

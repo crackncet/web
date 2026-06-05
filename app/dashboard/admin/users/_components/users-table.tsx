@@ -1,10 +1,16 @@
-"use client";
-
 import React, { useState } from "react";
 import { User } from "../_api/users.api";
-import { useToggleUserStatusMutation } from "../_queries/users.queries";
-import { ShieldAlert, Loader2, Sparkles, Ban, CheckCircle } from "lucide-react";
+import { useToggleUserStatusMutation, usePromoteToTeamMemberMutation } from "../_queries/users.queries";
+import { ShieldAlert, Loader2, Sparkles, Ban, CheckCircle, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UsersTableProps {
   users: User[];
@@ -13,7 +19,9 @@ interface UsersTableProps {
 
 export function UsersTable({ users, isLoading }: UsersTableProps) {
   const { mutate: toggleStatus, isPending } = useToggleUserStatusMutation();
+  const { mutate: promoteToTeam, isPending: isPromoting } = usePromoteToTeamMemberMutation();
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [confirmUser, setConfirmUser] = useState<User | null>(null);
 
   const handleToggle = (userId: string, role: string) => {
     if (role === "ADMIN") return;
@@ -63,10 +71,21 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
         <tbody className="divide-y divide-border text-foreground/80 text-sm">
           {users.map((user) => {
             const isUserToggling = togglingId === user.id && isPending;
+            const isStudent = user.globalRole === "STUDENT";
             return (
               <tr
                 key={user.id}
-                className="hover:bg-muted/10 transition-colors duration-150"
+                onClick={() => {
+                  if (isStudent && user.isActive) {
+                    setConfirmUser(user);
+                  }
+                }}
+                className={`transition-colors duration-150 select-none ${
+                  isStudent && user.isActive
+                    ? "cursor-pointer hover:bg-primary/5 dark:hover:bg-primary/10"
+                    : "hover:bg-muted/10"
+                }`}
+                title={isStudent && user.isActive ? "Click to promote to Team Member" : undefined}
               >
                 {/* Profile & Name */}
                 <td className="px-6 py-4">
@@ -83,9 +102,17 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                       </div>
                     )}
                     <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-foreground truncate">
-                        {user.fullName}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground truncate">
+                          {user.fullName}
+                        </span>
+                        {isStudent && user.isActive && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.2 rounded border opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            <UserPlus className="h-2.5 w-2.5" />
+                            <span>Promote</span>
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs text-muted-foreground truncate mt-0.5 font-normal">
                         {user.email}
                       </span>
@@ -149,7 +176,10 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                       variant={user.isActive ? "destructive" : "default"}
                       size="sm"
                       disabled={isUserToggling}
-                      onClick={() => handleToggle(user.id, user.globalRole)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggle(user.id, user.globalRole);
+                      }}
                       className="cursor-pointer min-w-[90px] h-8 rounded-lg text-xs font-medium"
                     >
                       {isUserToggling ? (
@@ -167,6 +197,50 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
           })}
         </tbody>
       </table>
+
+      {/* Promotion Confirmation Dialog */}
+      <Dialog
+        open={!!confirmUser}
+        onOpenChange={(open) => {
+          if (!open) setConfirmUser(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Promote to Team Member</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Are you sure you want to promote <span className="font-semibold text-foreground">{confirmUser?.fullName}</span> ({confirmUser?.email}) to a Team Member? This will grant them Team member privileges.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmUser(null)}
+              disabled={isPromoting}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (confirmUser) {
+                  promoteToTeam(confirmUser.email, {
+                    onSuccess: () => setConfirmUser(null),
+                  });
+                }
+              }}
+              disabled={isPromoting}
+              className="cursor-pointer"
+            >
+              {isPromoting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Confirm Promotion"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

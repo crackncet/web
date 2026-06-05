@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getUsers, toggleUserStatus, GetUsersFilters } from "../_api/users.api";
+import { getUsers, toggleUserStatus, promoteToTeamMember, GetUsersFilters } from "../_api/users.api";
 
 // Centralized cache keys
 export const userQueryKeys = {
@@ -28,6 +28,22 @@ export function useToggleUserStatusMutation() {
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Failed to toggle user status";
+      toast.error(message);
+    },
+  });
+}
+
+export function usePromoteToTeamMemberMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (email: string) => promoteToTeamMember(email),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+      toast.success(data.message || "User promoted to team member successfully");
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Failed to promote user";
       toast.error(message);
     },
   });
