@@ -215,7 +215,7 @@ export default function HeroSection() {
 
 
   return (
-    <section className="relative w-full min-h-[90vh] flex flex-col justify-between bg-gradient-to-b from-background via-slate-50/20 to-background dark:from-background dark:via-slate-950/10 dark:to-background overflow-hidden py-8 md:py-12">
+    <section className="relative w-full min-h-screen flex flex-col bg-gradient-to-b from-background via-slate-50/20 to-background dark:from-background dark:via-slate-950/10 dark:to-background overflow-hidden py-8 md:py-12">
       {/* Background Drawings - Responsive placeholders */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-30 dark:opacity-5 transition-opacity duration-500">
         <Image
@@ -236,55 +236,39 @@ export default function HeroSection() {
         />
       </div>
 
-      {/* Top logo display */}
-      <div className="relative z-10 w-full flex justify-center mb-8 md:mb-12 select-none">
-        <Image
-          src="/logo-light.png"
-          alt="CrackNCET Logo"
-          width={224}
-          height={64}
-          priority
-          className="h-12 sm:h-16 w-auto dark:hidden transition-all duration-300"
-        />
-        <Image
-          src="/logo-dark.png"
-          alt="CrackNCET Logo"
-          width={224}
-          height={64}
-          priority
-          className="h-12 sm:h-16 w-auto hidden dark:block transition-all duration-300"
-        />
-      </div>
+
 
       {/* Center aligned Core Info Container */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center my-auto flex flex-col items-center">
-        <span className="text-xs sm:text-sm font-black text-primary tracking-[0.2em] uppercase mb-4 py-1.5 px-3.5 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-sm animate-fade-in">
-          LEARN FROM THE BEST
-        </span>
-
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-[1.15] mb-6 max-w-3xl">
-          Secure Your Seat in India’s Top{" "}
-          <span className="text-primary">
-            IITs, NITs & RIEs
+      <div className="flex-1 flex flex-col justify-center items-center w-full relative z-10">
+        <div className="max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
+          <span className="text-xs sm:text-sm font-black text-primary tracking-[0.2em] uppercase mb-4 py-1.5 px-3.5 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-sm animate-fade-in">
+            LEARN FROM THE BEST
           </span>
-        </h1>
 
-        <p className="text-base sm:text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-2xl mb-10">
-          Get the only NCET preparation course taught by actual IITians. Learn and excel
-          with modern test patterns, chapter materials, and interactive support.
-        </p>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-[1.15] mb-6 max-w-3xl">
+            Secure Your Seat in India’s Top{" "}
+            <span className="text-primary">
+              IITs, NITs & RIEs
+            </span>
+          </h1>
 
-        {/* CTA Button with Wireframe Offset shadow effect */}
-        <div className="relative group mb-16">
-          <div className="absolute inset-0 bg-primary/15 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
-          <Link href="/courses">
-            <button
-              className="relative flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
-            >
-              <span>Explore Courses</span>
-              <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-            </button>
-          </Link>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-2xl mb-10">
+            Get the only NCET preparation course taught by actual IITians. Learn and excel
+            with modern test patterns, chapter materials, and interactive support.
+          </p>
+
+          {/* CTA Button with Wireframe Offset shadow effect */}
+          <div className="relative group mb-12">
+            <div className="absolute inset-0 bg-primary/15 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
+            <Link href="/courses">
+              <button
+                className="relative flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
+              >
+                <span>Explore Courses</span>
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 

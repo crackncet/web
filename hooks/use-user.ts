@@ -34,7 +34,7 @@ export const signUpSchema = z.object({
   email: z.string().email(),
   otp: z.string().min(4).max(8),
   fullName: z.string().min(2).max(255),
-  phone: z.string().min(10).max(15).optional(),
+  phone: z.string().min(10).max(15).optional().or(z.literal("")),
   password: z.string().min(8),
 });
 export type SignUpInput = z.infer<typeof signUpSchema>;
@@ -64,6 +64,16 @@ export interface LoginResponse {
   fullName: string;
   email?: string;
   profileImage: string | null;
+}
+
+export interface UserProfile {
+  isHod: boolean;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  profileImage: string | null;
+  globalRole: "STUDENT" | "TEAM_MEMBER" | "ADMIN";
+  hodStreams?: { id: string; name: string }[];
 }
 
 // ============================================================================
@@ -97,7 +107,7 @@ export const refreshTokenAPI = async (data: RefreshTokenInput) => {
   // Only manually required if not strictly relying on httpOnly cookies in your interceptor flow
   const response = await apiClient.post<ApiSuccessResponse<any>>("/auth/refresh-token", data);
   return response.data.data;
-}
+};
 
 export const logoutAPI = async () => {
   const response = await apiClient.post<ApiSuccessResponse<null>>("/auth/logout");
@@ -112,8 +122,7 @@ export const useUser = () => {
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
-        // NOTE: Make sure this endpoint matches your actual backend route to fetch profile
-        const response = await apiClient.get<ApiSuccessResponse<LoginResponse>>("/profile/details");
+        const response = await apiClient.get<ApiSuccessResponse<UserProfile>>("/profile/details");
         return response.data.data;
       } catch (error) {
         return null;
@@ -128,9 +137,9 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
   return useMutation({ 
     mutationFn: loginUserAPI,
-    onSuccess: (data) => {
-      // Instantly populate the user cache with the returned login data!
-      queryClient.setQueryData(["authUser"], data);
+    onSuccess: () => {
+      // Invalidate the authUser query to trigger fetching full profile details
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
     }
   });
 };
@@ -143,9 +152,9 @@ export const useSignUp = () => {
   const queryClient = useQueryClient();
   return useMutation({ 
     mutationFn: signUpAPI,
-    onSuccess: (data) => {
-      // Instantly populate the user cache upon successful signup!
-      queryClient.setQueryData(["authUser"], data);
+    onSuccess: () => {
+      // Invalidate the authUser query to trigger fetching full profile details
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
     }
   });
 };

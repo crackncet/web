@@ -1,0 +1,69 @@
+import { apiClient, ApiSuccessResponse } from "@/lib/api-client";
+
+export interface Course {
+  id: string;
+  examId: string;
+  testSeriesId: string | null;
+  title: string;
+  description: string | null;
+  banner: string | null;
+  price: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
+}
+
+export interface ListCourseQuery {
+  page?: number;
+  limit?: number;
+  query?: string;
+  examId?: string;
+  status?: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
+}
+
+export interface CoursesMetadata {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  availableStatuses: string[];
+}
+
+export async function getAdminCourses(filters: ListCourseQuery = {}) {
+  const params: Record<string, string | number> = {};
+  if (filters.page) params.page = filters.page;
+  if (filters.limit) params.limit = filters.limit;
+  if (filters.query?.trim()) params.query = filters.query.trim();
+  if (filters.examId) params.examId = filters.examId;
+  if (filters.status) params.status = filters.status;
+
+  const response = await apiClient.get<ApiSuccessResponse<Course[]>>(
+    "/courses/admin-view",
+    { params }
+  );
+  return response.data;
+}
+
+export interface CreateCourseInput {
+  examId: string;
+  title: string;
+  description?: string;
+  banner?: string;
+  price: string;
+  startDate?: string;
+  endDate?: string;
+  testSeriesId?: string;
+  streamId: string[];
+}
+
+export async function createCourse(data: CreateCourseInput) {
+  const response = await apiClient.post<ApiSuccessResponse<Course>>(
+    "/courses",
+    data
+  );
+  return response.data;
+}

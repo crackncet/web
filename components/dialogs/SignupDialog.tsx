@@ -69,7 +69,11 @@ export default function SignupDialog() {
   };
 
   const onSignupSubmit = (data: SignUpInput) => {
-    signUp(data, {
+    const cleanedData = { ...data };
+    if (!cleanedData.phone || cleanedData.phone.trim() === "") {
+      delete cleanedData.phone;
+    }
+    signUp(cleanedData, {
       onSuccess: () => {
         toast.success("Account created successfully!");
         setOpen(false);
@@ -100,7 +104,7 @@ export default function SignupDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">Register</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create an Account</DialogTitle>
           <DialogDescription>
@@ -196,7 +200,11 @@ export default function SignupDialog() {
               </Field>
             </FieldGroup>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-col gap-2 pt-2">
+              <Button type="submit" className="w-full" disabled={isSigningUp}>
+                {isSigningUp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Complete Registration
+              </Button>
               <Button 
                 type="button" 
                 variant="outline" 
@@ -204,10 +212,6 @@ export default function SignupDialog() {
                 onClick={() => setOtpSent(false)}
               >
                 Back
-              </Button>
-              <Button type="submit" className="w-full" disabled={isSigningUp}>
-                {isSigningUp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Complete Registration
               </Button>
             </div>
           </form>
