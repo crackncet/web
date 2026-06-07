@@ -1,20 +1,17 @@
 "use client";
 
 import React from "react";
-import { Course } from "../_api/courses.api";
+import { MemberCourse } from "../_api/courses.api";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Tag, Sparkles, Star, Loader2, Pencil } from "lucide-react";
+import { Calendar, Tag, Sparkles, Star, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useFeatureCourseMutation, useUnfeatureCourseMutation } from "../_queries/courses.queries";
-import { EditCourseDialog } from "./edit-course-dialog";
 import Image from "next/image";
 
-interface AdminCourseCardProps {
-  course: Course;
-  examName: string;
+interface MemberCourseCardProps {
+  course: MemberCourse;
 }
 
-export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
+export function MemberCourseCard({ course }: MemberCourseCardProps) {
   const dateStr = `${new Date(course.startDate).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -23,22 +20,6 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
     day: "numeric",
     year: "numeric",
   })}`;
-
-  const featureMutation = useFeatureCourseMutation();
-  const unfeatureMutation = useUnfeatureCourseMutation();
-
-  const handleToggleFeature = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    if (course.isFeatured) {
-      unfeatureMutation.mutate(course.id);
-    } else {
-      featureMutation.mutate(course.id);
-    }
-  };
-
-  const isPending = featureMutation.isPending || unfeatureMutation.isPending;
 
   // Active status shadow and motion configuration
   const shadowClass = course.isActive
@@ -55,6 +36,7 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
             <Image
               src={course.banner}
               alt={course.title}
+              loading="lazy"
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition-transform duration-500 group-hover:scale-103"
@@ -68,31 +50,19 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
           {/* Absolute Badges on Image */}
           <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
             <span className="inline-flex px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded bg-white/95 text-slate-800 shadow-xs border border-slate-200/40 backdrop-blur-xs select-none">
-              {examName}
+              {course.examName}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[8px] font-bold rounded bg-slate-950/85 text-white backdrop-blur-xs select-none uppercase tracking-wider shadow-xs">
               {course.status}
             </span>
           </div>
 
-          {/* Star Feature Button on Image */}
-          <button
-            type="button"
-            onClick={handleToggleFeature}
-            disabled={isPending}
-            className={`absolute top-2.5 right-2.5 p-1.5 rounded-full border shadow-sm backdrop-blur-md transition-all duration-300 cursor-pointer z-10 ${
-              course.isFeatured
-                ? "bg-amber-500 border-amber-500 text-white hover:bg-amber-600 hover:border-amber-600 scale-105"
-                : "bg-white/85 border-slate-200/50 hover:bg-white text-slate-700 hover:text-amber-500 hover:scale-105"
-            }`}
-            title={course.isFeatured ? "Unfeature Course" : "Feature Course"}
-          >
-            {isPending ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Star className={`h-3 w-3 ${course.isFeatured ? "fill-current" : ""}`} />
-            )}
-          </button>
+          {/* Gold Star indicator if featured */}
+          {course.isFeatured && (
+            <div className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-amber-500 text-white shadow-sm border border-amber-500 z-10">
+              <Star className="h-3 w-3 fill-current" />
+            </div>
+          )}
         </div>
       </div>
 
@@ -132,21 +102,33 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
           </p>
 
           {/* Divider Line */}
-          <div className="w-full h-px bg-slate-100 dark:bg-slate-800/60 my-3.5" />
+          <div className="w-full h-px bg-slate-100 dark:bg-slate-800/60 my-3" />
 
-          {/* Stream Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 min-h-[20px]">
-            {course.streams && course.streams.length > 0 ? (
-              course.streams.map((stream, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border border-slate-150 dark:border-slate-800/40"
-                >
-                  {stream}
-                </span>
-              ))
-            ) : (
-              <span className="text-[9px] text-muted-foreground/45 italic">No streams</span>
+          {/* Stream Tags & Test Series Badge */}
+          <div className="space-y-2 flex flex-col items-center justify-center">
+            {/* Stream Tags */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 min-h-[20px]">
+              {course.streams && course.streams.length > 0 ? (
+                course.streams.map((stream, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border border-slate-150 dark:border-slate-800/40"
+                  >
+                    {stream}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[9px] text-muted-foreground/45 italic">No streams</span>
+              )}
+            </div>
+
+            {/* Test Series Badge */}
+            {course.testSeriesTitle && (
+              <div className="inline-flex items-center gap-1 text-[9px] bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-150 dark:border-slate-800/40">
+                <BookOpen className="h-3 w-3 text-primary/70" />
+                <span className="font-bold text-[8px] uppercase tracking-wider text-primary/80">Test Series:</span>
+                <span className="font-semibold truncate max-w-[180px]">{course.testSeriesTitle}</span>
+              </div>
             )}
           </div>
         </div>
@@ -164,25 +146,13 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
             </span>
           </div>
 
-          {/* Action Buttons Row */}
-          <div className="flex items-center gap-2 pt-0.5">
+          {/* Action Button */}
+          <div className="pt-0.5">
             <Button 
-              variant="outline" 
-              className="flex-1 text-xs font-bold h-9.5 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shadow-2xs transition-colors rounded-xl"
+              className="w-full text-xs font-bold h-9.5 hover:bg-primary/95 cursor-pointer shadow-2xs transition-all duration-200 rounded-xl"
             >
-              View Course
+              View Course Workspace
             </Button>
-            
-            <EditCourseDialog course={course}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9.5 w-9.5 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shrink-0 shadow-2xs transition-colors rounded-xl"
-                title="Edit Course"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </EditCourseDialog>
           </div>
         </div>
       </CardContent>

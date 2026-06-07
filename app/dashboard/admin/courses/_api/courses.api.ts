@@ -15,6 +15,19 @@ export interface Course {
   createdAt: string;
   updatedAt: string;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
+  isFeatured?: boolean;
+  streams?: string[];
+}
+
+export interface FeaturedCourse {
+  id: string;
+  examName: string;
+  title: string;
+  description: string | null;
+  banner: string | null;
+  price: string;
+  startDate: string;
+  streams?: string[];
 }
 
 export interface ListCourseQuery {
@@ -63,6 +76,38 @@ export interface CreateCourseInput {
 export async function createCourse(data: CreateCourseInput) {
   const response = await apiClient.post<ApiSuccessResponse<Course>>(
     "/courses",
+    data
+  );
+  return response.data;
+}
+
+export async function featureCourse(courseId: string) {
+  const response = await apiClient.post<ApiSuccessResponse<{ courseId: string; featured: boolean }>>(
+    `/courses/${courseId}/featured`
+  );
+  return response.data;
+}
+
+export async function unfeatureCourse(courseId: string) {
+  const response = await apiClient.delete<ApiSuccessResponse<{ courseId: string; featured: boolean }>>(
+    `/courses/${courseId}/featured`
+  );
+  return response.data;
+}
+
+export async function getFeaturedCourses() {
+  const response = await apiClient.get<ApiSuccessResponse<FeaturedCourse[]>>(
+    "/courses/featured"
+  );
+  return response.data;
+}
+
+export async function updateCourse(
+  courseId: string,
+  data: Partial<CreateCourseInput> & { isActive?: boolean; isPublished?: boolean }
+) {
+  const response = await apiClient.patch<ApiSuccessResponse<Course>>(
+    `/courses/${courseId}`,
     data
   );
   return response.data;

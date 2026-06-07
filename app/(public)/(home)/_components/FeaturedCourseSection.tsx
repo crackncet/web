@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Calendar, ArrowRight, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Sparkles, Tag } from "lucide-react";
 import { FeaturedCourse } from "../_api/courses.api";
 import Link from "next/link";
-import { RetroCard } from "@/components/ui/retro-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 const DUMMY_COURSES: FeaturedCourse[] = [
@@ -16,6 +17,7 @@ const DUMMY_COURSES: FeaturedCourse[] = [
     banner: null,
     price: "4999.00",
     startDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    streams: ["BSc", "BEd", "BCom"],
   },
   {
     id: "dummy-2",
@@ -25,6 +27,7 @@ const DUMMY_COURSES: FeaturedCourse[] = [
     banner: null,
     price: "1999.00",
     startDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
+    streams: ["BA", "BEd"],
   },
   {
     id: "dummy-3",
@@ -34,6 +37,7 @@ const DUMMY_COURSES: FeaturedCourse[] = [
     banner: null,
     price: "999.00",
     startDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
+    streams: ["BSc", "BA", "BCom"],
   }
 ];
 
@@ -102,15 +106,15 @@ export default function FeaturedCourseSection({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[1, 2, 3].map((idx) => (
               <div key={idx} className="relative w-full h-[400px]">
-                <div className="absolute inset-0 bg-muted/20 rounded-[24px] border-2 border-dashed border-muted translate-x-2 translate-y-2" />
-                <div className="relative h-full bg-background border-2 border-muted rounded-[24px] overflow-hidden flex flex-col p-6 animate-pulse">
-                  <div className="aspect-video bg-muted rounded-xl mb-4" />
-                  <div className="h-6 bg-muted rounded-md w-3/4 mb-3" />
+                <div className="relative h-full w-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-5 animate-pulse shadow-[0_8px_30px_rgba(0,0,0,0.02)]">
+                  <div className="w-[90%] mx-auto mt-2 aspect-video bg-muted rounded-xl mb-4" />
+                  <div className="h-5 bg-muted rounded-md w-3/4 mx-auto mb-3" />
+                  <div className="h-4 bg-muted rounded-md w-1/2 mx-auto mb-4" />
                   <div className="h-4 bg-muted rounded-md w-full mb-2" />
-                  <div className="h-4 bg-muted rounded-md w-5/6 mb-4" />
-                  <div className="mt-auto pt-4 border-t border-muted/30 flex justify-between items-center">
-                    <div className="h-8 bg-muted rounded-md w-20" />
-                    <div className="h-10 bg-muted rounded-md w-24" />
+                  <div className="h-4 bg-muted rounded-md w-5/6 mx-auto mb-4" />
+                  <div className="mt-auto pt-4 border-t border-muted/25 flex justify-between items-center">
+                    <div className="h-5 bg-muted rounded-md w-20" />
+                    <div className="h-9 bg-muted rounded-md w-28" />
                   </div>
                 </div>
               </div>
@@ -143,7 +147,7 @@ export default function FeaturedCourseSection({
               <button
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-background border-2 border-slate-900 dark:border-slate-100 rounded-full shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-[calc(50%+2px)] transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-25 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-background border-2 border-slate-900 dark:border-slate-100 rounded-full shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-[calc(50%+2px)] transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
                 aria-label="Previous Course"
               >
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-foreground" />
@@ -153,7 +157,7 @@ export default function FeaturedCourseSection({
               <button
                 onClick={handleNext}
                 disabled={currentIndex >= maxIndex}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-background border-2 border-slate-900 dark:border-slate-100 rounded-full shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-[calc(50%+2px)] transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-25 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-background border-2 border-slate-900 dark:border-slate-100 rounded-full shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-[calc(50%+2px)] transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
                 aria-label="Next Course"
               >
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-foreground" />
@@ -175,13 +179,15 @@ export default function FeaturedCourseSection({
             >
               {displayCourses.map((course) => {
                 const formattedPrice = parseFloat(course.price).toLocaleString("en-IN");
-                const formattedDate = course.startDate
-                  ? new Date(course.startDate).toLocaleDateString("en-IN", {
-                      day: "2-digit",
+                const dateStr = course.startDate
+                  ? `Starts: ${new Date(course.startDate).toLocaleDateString("en-US", {
                       month: "short",
+                      day: "numeric",
                       year: "numeric",
-                    })
-                  : null;
+                    })}`
+                  : "Flexible Dates";
+
+                const shadowClass = "shadow-[0_8px_30px_rgba(16,185,129,0.06)] dark:shadow-[0_8px_30px_rgba(16,185,129,0.02)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.12)] hover:-translate-y-1 transition-all duration-300";
 
                 return (
                   <div
@@ -189,76 +195,111 @@ export default function FeaturedCourseSection({
                     style={{ width: `${100 / visibleCount}%` }}
                     className="shrink-0 px-3 md:px-4 py-4 flex"
                   >
-                    <RetroCard shadowClassName="bg-primary/10 dark:bg-primary/5">
-                        {/* Banner Image or Gradient Fallback */}
-                        <div className="relative w-full aspect-video border-b-2 border-slate-900 dark:border-slate-100 bg-gradient-to-tr from-violet-600 via-indigo-600 to-primary flex items-center justify-center overflow-hidden">
+                    <Card className={`group overflow-hidden border-0 bg-white dark:bg-slate-900 flex flex-col h-full w-full select-none ${shadowClass}`}>
+                      
+                      {/* Banner - Centered 90% Width */}
+                      <div className="w-full pt-4 px-4 flex justify-center">
+                        <div className="relative aspect-video w-[90%] overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/40 dark:border-slate-800 shadow-xs">
                           {course.banner ? (
                             <Image
                               src={course.banner}
                               alt={course.title}
                               fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="object-cover transition-transform duration-500 group-hover:scale-103"
                             />
                           ) : (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                              <BookOpen className="w-10 h-10 text-white/40 mb-2" />
-                              <span className="text-white/80 font-black tracking-widest text-xs uppercase bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
-                                {course.examName}
-                              </span>
+                            <div className="w-full h-full bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-pink-500/5 flex items-center justify-center relative">
+                              <Sparkles className="h-6 w-6 text-primary/30 animate-pulse" />
                             </div>
                           )}
 
-                          {/* Floating Badge for Exam Name */}
-                          {course.banner && (
-                            <div className="absolute top-3 left-3 bg-amber-400 dark:bg-amber-500 text-slate-950 px-3 py-1 text-xs font-black uppercase rounded-full border-2 border-slate-900 dark:border-slate-950 shadow-sm z-10">
+                          {/* Absolute Badges on Image */}
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
+                            <span className="inline-flex px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded bg-white/95 text-slate-800 shadow-xs border border-slate-200/40 backdrop-blur-xs select-none">
                               {course.examName}
-                            </div>
-                          )}
+                            </span>
+                            
+                          </div>
                         </div>
+                      </div>
 
-                        {/* Card Content */}
-                        <div className="flex-1 flex flex-col p-6">
-                          {/* Start Date */}
-                          {formattedDate && (
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-3">
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span>Starts: {formattedDate}</span>
+                      {/* Details Card Content - Overlapping bottom of image area */}
+                      <CardContent className="relative bg-white dark:bg-slate-900 pt-5 px-5 pb-5 flex-1 flex flex-col justify-between -mt-4 z-20">
+                        
+                        {/* Slanted corner cut-in notch SVG */}
+                        <svg 
+                          className="absolute -top-2.5 left-0 w-full h-3 text-white dark:text-slate-900 fill-current pointer-events-none z-10" 
+                          viewBox="0 0 100 10" 
+                          preserveAspectRatio="none"
+                        >
+                          <path d="M0 0 L15 0 L22 10 L78 10 L85 0 L100 0 L100 10 L0 10 Z" />
+                        </svg>
+
+                        <div className="space-y-3.5 mt-1">
+                          {/* Centered Course Name */}
+                          <div className="text-center space-y-1">
+                            <div className="flex items-center justify-center">
+                              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight leading-snug line-clamp-1 group-hover:text-primary transition-colors">
+                                {course.title}
+                              </h3>
                             </div>
-                          )}
+                          </div>
 
-                          {/* Title */}
-                          <h3 className="text-base md:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight leading-snug mb-2 group-hover:text-primary transition-colors min-h-[3rem] line-clamp-2">
-                            {course.title}
-                          </h3>
-
-                          {/* Description */}
+                          {/* Centered Description */}
                           {course.description && (
-                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-3 mb-6 min-h-[3.25rem]">
+                            <p className="text-center text-[11px] text-muted-foreground line-clamp-2 leading-relaxed min-h-[34px] px-1">
                               {course.description}
                             </p>
                           )}
 
-                          {/* Footer price and CTA */}
-                          <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-900/60 flex items-center justify-between">
-                            <div className="flex flex-col">
-                              <span className="text-[9px] text-muted-foreground uppercase font-black tracking-wider">
-                                Price
-                              </span>
-                              <span className="text-base md:text-lg font-black text-slate-900 dark:text-slate-100">
-                                ₹{formattedPrice}
-                              </span>
-                            </div>
+                          {/* Divider Line */}
+                          <div className="w-full h-px bg-slate-100 dark:bg-slate-800/60 my-3.5" />
 
-                            <Link href={`/courses/${course.id}`}>
-                              <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground font-black text-2xs md:text-xs uppercase border-2 border-slate-900 dark:border-slate-950 rounded-xl hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all duration-200 cursor-pointer">
+                          {/* Stream Tags */}
+                          <div className="flex flex-wrap items-center justify-center gap-1.5 min-h-[20px]">
+                            {course.streams && course.streams.length > 0 ? (
+                              course.streams.map((stream, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border border-slate-150 dark:border-slate-800/40"
+                                >
+                                  {stream}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[9px] text-muted-foreground/45 italic">No streams</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Dates and Price */}
+                        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 space-y-3.5">
+                          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1 font-medium">
+                              <Calendar className="h-3.5 w-3.5 text-primary/70" />
+                              {dateStr}
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-100 text-xs">
+                              <Tag className="h-3.5 w-3.5 text-primary/70" />
+                              ₹{formattedPrice}
+                            </span>
+                          </div>
+
+                          {/* Explore CTA Button */}
+                          <div className="pt-0.5">
+                            <Link href={`/courses/${course.id}`} className="w-full block">
+                              <Button 
+                                className="w-full text-xs font-bold h-9.5 cursor-pointer shadow-2xs transition-colors rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-1.5"
+                              >
                                 <span>Explore</span>
-                                <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                              </button>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </Button>
                             </Link>
                           </div>
                         </div>
-                      </RetroCard>
+                      </CardContent>
+                    </Card>
                   </div>
                 );
               })}

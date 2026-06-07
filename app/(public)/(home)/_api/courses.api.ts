@@ -8,6 +8,7 @@ export interface FeaturedCourse {
   banner: string | null;
   price: string;
   startDate: string | null;
+  streams?: string[];
 }
 
 export async function getFeaturedCourses(): Promise<FeaturedCourse[]> {

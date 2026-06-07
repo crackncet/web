@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/app/dashboard/admin/layout";
-import { useAdminCoursesQuery } from "./_queries/courses.queries";
+import { useAdminCoursesQuery, useFeaturedCoursesQuery } from "./_queries/courses.queries";
 import { useExamsQuery } from "../metadata/_queries/exams.queries";
 import {
   Search,
   BookOpen,
   RefreshCw,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Star
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,11 @@ export default function CourseAdminPage() {
     status: (selectedStatus as any) || undefined,
   });
 
+  const { data: featuredData, isLoading: isFeaturedLoading } = useFeaturedCoursesQuery();
+
   const courses = responseData?.data || [];
+  const featuredCourses = featuredData?.data || [];
+
   const meta = responseData?.meta || {
     page: 1,
     limit: 6,
@@ -106,29 +111,93 @@ export default function CourseAdminPage() {
         </div>
       </AdminHeader>
 
-      {/* Filter Toolbar */}
-      <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 select-none">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          {/* Search */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Search Course</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by title..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-10 text-sm bg-muted/20 border-border"
-              />
-            </div>
-          </div>
+      {/* Featured Courses Section */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 select-none">
+          <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+          <h2 className="text-sm font-bold tracking-tight text-foreground">Featured Courses</h2>
+          <span className="text-[10px] font-semibold text-muted-foreground/60 px-1.5 py-0.5 rounded-md bg-muted uppercase tracking-wider">
+            {featuredCourses.length}
+          </span>
+        </div>
 
-          {/* Exam Filter */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Filter by Exam</label>
+        {isFeaturedLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <Card key={idx} className="overflow-hidden border border-amber-250/30 dark:border-amber-900/20 bg-amber-50/5 dark:bg-amber-955/5 flex flex-col h-full animate-pulse">
+                <Skeleton className="aspect-video w-full rounded-none bg-muted/60" />
+                <CardContent className="p-4 space-y-3">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : featuredCourses.length === 0 ? (
+          <Card className="border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/10 p-5 text-center select-none rounded-xl">
+            <p className="text-xs text-muted-foreground">
+              No featured courses. Star mark any active, published course below to showcase it.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredCourses.map((fc) => {
+              const fullCourse = courses.find((c) => c.id === fc.id) || {
+                ...fc,
+                examId: "",
+                testSeriesId: null,
+                endDate: fc.startDate,
+                status: "ONGOING" as const,
+                isActive: true,
+                isPublished: true,
+                isFeatured: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                streams: fc.streams || [],
+              };
+              return (
+                <AdminCourseCard
+                  key={fc.id}
+                  course={fullCourse}
+                  examName={fc.examName}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Toolbar */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 select-none">
+        <div className="flex flex-1 items-center gap-3 w-full md:max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-10 text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-2xs rounded-lg"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handleResetFilters}
+            disabled={!searchTerm && !selectedExamId && !selectedStatus}
+            className="h-10 w-10 shrink-0 border-slate-200 dark:border-slate-800 hover:bg-muted/10 rounded-lg"
+            title="Reset Filters"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto shrink-0">
+          <div className="w-full sm:w-48">
             <Select value={selectedExamId || "ALL"} onValueChange={handleExamChange}>
-              <SelectTrigger className="w-full bg-muted/20 border-border text-sm h-10 px-3">
+              <SelectTrigger className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-sm h-10 px-3 shadow-2xs rounded-lg">
                 <SelectValue placeholder="All Exams" />
               </SelectTrigger>
               <SelectContent>
@@ -142,11 +211,9 @@ export default function CourseAdminPage() {
             </Select>
           </div>
 
-          {/* Status Filter */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Filter by Status</label>
+          <div className="w-full sm:w-48">
             <Select value={selectedStatus || "ALL"} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-full bg-muted/20 border-border text-sm h-10 px-3">
+              <SelectTrigger className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-sm h-10 px-3 shadow-2xs rounded-lg">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -158,22 +225,8 @@ export default function CourseAdminPage() {
               </SelectContent>
             </Select>
           </div>
-
-          {/* Reset Filters */}
-          <div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleResetFilters}
-              disabled={!searchTerm && !selectedExamId && !selectedStatus}
-              className="w-full h-10 text-xs font-semibold gap-1.5 border-border hover:bg-muted/10"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Reset Filters
-            </Button>
-          </div>
         </div>
-      </Card>
+      </div>
 
       {/* Courses Grid / Skeletons / Empty State */}
       {isCoursesLoading ? (
