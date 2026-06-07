@@ -67,6 +67,7 @@ export interface LoginResponse {
 }
 
 export interface UserProfile {
+  id: string;
   isHod: boolean;
   fullName: string;
   email: string;

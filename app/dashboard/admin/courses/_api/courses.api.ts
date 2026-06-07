@@ -1,4 +1,5 @@
 import { apiClient, ApiSuccessResponse } from "@/lib/api-client";
+import { CourseDetail } from "../../../member/courses/_api/courses.api";
 
 export interface Course {
   id: string;
@@ -109,6 +110,13 @@ export async function updateCourse(
   const response = await apiClient.patch<ApiSuccessResponse<Course>>(
     `/courses/${courseId}`,
     data
+  );
+  return response.data;
+}
+
+export async function getCourseDetail(courseId: string) {
+  const response = await apiClient.get<ApiSuccessResponse<CourseDetail>>(
+    `/courses/${courseId}`
   );
   return response.data;
 }

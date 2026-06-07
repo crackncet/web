@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useFeatureCourseMutation, useUnfeatureCourseMutation } from "../_queries/courses.queries";
 import { EditCourseDialog } from "./edit-course-dialog";
 import Image from "next/image";
+import Link from "next/link";
 
 interface AdminCourseCardProps {
   course: Course;
@@ -166,12 +167,14 @@ export function AdminCourseCard({ course, examName }: AdminCourseCardProps) {
 
           {/* Action Buttons Row */}
           <div className="flex items-center gap-2 pt-0.5">
-            <Button 
-              variant="outline" 
-              className="flex-1 text-xs font-bold h-9.5 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shadow-2xs transition-colors rounded-xl"
-            >
-              View Course
-            </Button>
+            <Link href={`/dashboard/admin/courses/${course.id}`} className="flex-1">
+              <Button 
+                variant="outline" 
+                className="w-full text-xs font-bold h-9.5 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shadow-2xs transition-colors rounded-xl"
+              >
+                View Course
+              </Button>
+            </Link>
             
             <EditCourseDialog course={course}>
               <Button

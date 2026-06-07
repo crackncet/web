@@ -6,6 +6,7 @@ import {
   unfeatureCourse, 
   getFeaturedCourses, 
   updateCourse,
+  getCourseDetail,
   ListCourseQuery, 
   CreateCourseInput 
 } from "../_api/courses.api";
@@ -97,6 +98,15 @@ export function useFeaturedCoursesQuery() {
   return useQuery({
     queryKey: COURSE_QUERY_KEYS.featured(),
     queryFn: () => getFeaturedCourses(),
+    staleTime: 10000,
+  });
+}
+
+export function useCourseDetailQuery(courseId: string) {
+  return useQuery({
+    queryKey: ["adminCourses", "detail", courseId],
+    queryFn: () => getCourseDetail(courseId),
+    enabled: !!courseId,
     staleTime: 10000,
   });
 }

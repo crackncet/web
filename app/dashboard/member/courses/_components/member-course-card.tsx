@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Tag, Sparkles, Star, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 interface MemberCourseCardProps {
   course: MemberCourse;
@@ -148,11 +149,13 @@ export function MemberCourseCard({ course }: MemberCourseCardProps) {
 
           {/* Action Button */}
           <div className="pt-0.5">
-            <Button 
-              className="w-full text-xs font-bold h-9.5 hover:bg-primary/95 cursor-pointer shadow-2xs transition-all duration-200 rounded-xl"
-            >
-              View Course Workspace
-            </Button>
+            <Link href={`/dashboard/member/courses/${course.id}`} className="block w-full">
+              <Button 
+                className="w-full text-xs font-bold h-9.5 hover:bg-primary/95 cursor-pointer shadow-2xs transition-all duration-200 rounded-xl"
+              >
+                View Course Workspace
+              </Button>
+            </Link>
           </div>
         </div>
       </CardContent>
