@@ -116,14 +116,14 @@ export default function AdminCourseDetailPage() {
 
       {/* Course Banner/Header Card */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col md:flex-row gap-6 p-6">
-        <div className="relative aspect-video w-full md:w-64 shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/40 dark:border-slate-800 shadow-xs">
+        <div className="relative aspect-video w-full md:w-[40%] shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/40 dark:border-slate-800 shadow-xs">
           {course.banner ? (
             <Image
               src={course.banner}
               alt={course.title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 256px"
+              sizes="(max-width: 768px) 100vw, 40vw"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-pink-500/5 flex items-center justify-center">

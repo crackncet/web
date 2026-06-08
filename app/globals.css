@@ -130,3 +130,19 @@
     @apply font-sans;
   }
 }
+
+/* Ensure MathLive's virtual keyboard renders above Radix dialog overlays */
+math-field-virtual-keyboard,
+[data-keyboard],
+.ml-keyboard,
+.ML__keyboard,
+.ML__keyboard-container,
+#mathlive-shared-virtual-keyboard-container {
+  z-index: 99999999 !important;
+}
+/* MathLive virtual keyboard — additional selectors for all versions (v0.85+) */
+math-virtual-keyboard,
+#mathlive-keyboard {
+  z-index: 99999999 !important;
+  position: fixed !important;
+}
