@@ -229,3 +229,36 @@ export async function updateQuestion(bankId: string, questionId: string, body: a
   );
   return response.data;
 }
+
+export async function copyQuestion(
+  bankId: string,
+  questionId: string,
+  body: {
+    targetBankId: string;
+    targetSectionId: string | null;
+    originalText: string;
+    options: { sequence: number; originalText: string; isCorrect: boolean }[];
+    solution?: { originalText: string } | null;
+  }
+) {
+  const response = await apiClient.post<ApiSuccessResponse<{ success: boolean; newQuestionId: string }>>(
+    `/library/question-banks/${bankId}/questions/${questionId}/copy`,
+    body
+  );
+  return response.data;
+}
+
+export async function reuseQuestion(
+  bankId: string,
+  questionId: string,
+  body: {
+    targetBankId: string;
+    targetSectionId: string | null;
+  }
+) {
+  const response = await apiClient.post<ApiSuccessResponse<{ success: boolean }>>(
+    `/library/question-banks/${bankId}/questions/${questionId}/reuse`,
+    body
+  );
+  return response.data;
+}

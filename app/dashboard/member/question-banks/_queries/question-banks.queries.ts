@@ -12,6 +12,8 @@ import {
   uploadQuestions,
   translateQuestions,
   updateQuestion,
+  copyQuestion,
+  reuseQuestion,
   ListQuestionBanksQuery,
   CreateQuestionBankInput,
   UpdateQuestionBankInput,
@@ -143,5 +145,46 @@ export function useUpdateQuestion(bankId: string) {
 export function useTranslateQuestions(bankId: string) {
   return useMutation({
     mutationFn: (texts: string[]) => translateQuestions(bankId, texts),
+  });
+}
+
+export function useCopyQuestion(bankId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      questionId,
+      body,
+    }: {
+      questionId: string;
+      body: {
+        targetBankId: string;
+        targetSectionId: string | null;
+        originalText: string;
+        options: { sequence: number; originalText: string; isCorrect: boolean }[];
+        solution?: { originalText: string } | null;
+      };
+    }) => copyQuestion(bankId, questionId, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUESTION_BANKS_KEYS.all });
+    },
+  });
+}
+
+export function useReuseQuestion(bankId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      questionId,
+      body,
+    }: {
+      questionId: string;
+      body: {
+        targetBankId: string;
+        targetSectionId: string | null;
+      };
+    }) => reuseQuestion(bankId, questionId, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUESTION_BANKS_KEYS.all });
+    },
   });
 }

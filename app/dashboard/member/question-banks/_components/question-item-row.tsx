@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Check, ChevronUp, ChevronDown, Edit } from "lucide-react";
+import { Check, ChevronUp, ChevronDown, Edit, Copy, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditQuestionDialog } from "./edit-question-dialog";
+import { CopyReuseQuestionDialog } from "./copy-reuse-dialog";
 
 interface QuestionItemRowProps {
   question: any;
@@ -20,6 +21,8 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory }: Q
   const [isSolutionOpen, setIsSolutionOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [copyOpen, setCopyOpen] = useState(false);
+  const [reuseOpen, setReuseOpen] = useState(false);
 
   // Map question type code to human label
   const typeLabels: Record<string, string> = {
@@ -53,15 +56,35 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory }: Q
           <span className="h-3.5 w-px bg-slate-200 dark:bg-slate-800" />
           <span className="font-semibold text-primary">{typeLabels[question.type] || question.type}</span>
           {(resolvedBankId || onUpdateInMemory) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setEditOpen(true)}
-              className="h-6 w-6 p-0 rounded-md text-muted-foreground hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer ml-1.5 inline-flex items-center justify-center"
-              title="Edit Question"
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditOpen(true)}
+                className="h-6 w-6 p-0 rounded-md text-muted-foreground hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer ml-1.5 inline-flex items-center justify-center"
+                title="Edit Question"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCopyOpen(true)}
+                className="h-6 w-6 p-0 rounded-md text-muted-foreground hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer ml-1 inline-flex items-center justify-center"
+                title="Copy Question"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setReuseOpen(true)}
+                className="h-6 w-6 p-0 rounded-md text-muted-foreground hover:text-indigo-650 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer ml-1 inline-flex items-center justify-center"
+                title="Reuse Question"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+              </Button>
+            </>
           )}
         </div>
         <span className="font-semibold">
@@ -232,6 +255,28 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory }: Q
           index={index}
           bankId={resolvedBankId}
           onUpdateInMemory={onUpdateInMemory}
+        />
+      )}
+
+      {/* Copy Question Dialog */}
+      {copyOpen && (
+        <CopyReuseQuestionDialog
+          open={copyOpen}
+          onOpenChange={setCopyOpen}
+          question={question}
+          mode="copy"
+          bankId={resolvedBankId}
+        />
+      )}
+
+      {/* Reuse Question Dialog */}
+      {reuseOpen && (
+        <CopyReuseQuestionDialog
+          open={reuseOpen}
+          onOpenChange={setReuseOpen}
+          question={question}
+          mode="reuse"
+          bankId={resolvedBankId}
         />
       )}
     </div>
