@@ -158,7 +158,7 @@ export default function TestSeriesAdminPage() {
                 <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="UPCOMING">Upcoming</SelectItem>
                 <SelectItem value="ONGOING">Ongoing</SelectItem>
-                <SelectItem value="ARCHIVED">Archived</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
                 <SelectItem value="UNPUBLISHED">Unpublished</SelectItem>
               </SelectContent>
             </Select>

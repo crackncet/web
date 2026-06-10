@@ -6,19 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useExamsQuery } from "../../metadata/_queries/exams.queries";
 import { useStreamsQuery } from "../../metadata/_queries/streams.queries";
-import { useCreateTestSeriesMutation } from "../_queries/test-series.queries";
-import { CreateTestSeriesInput } from "../_api/test-series.api";
-import { Loader2, Plus, X } from "lucide-react";
+import { useUpdateTestSeriesMutation } from "../_queries/test-series.queries";
+import { TestSeries } from "../_api/test-series.api";
+import { Loader2, Sparkles, X, Pencil } from "lucide-react";
 import { FileUploader } from "@/components/ui/file-uploader";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -48,11 +40,13 @@ const testSeriesFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
   description: z.string().optional(),
   banner: z.string().url("Banner must be a valid URL").or(z.literal("")).optional(),
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 1999 or 1999.99)"),
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 999 or 999.99)"),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   examId: z.string().uuid("Please select an exam"),
   streamId: z.array(z.string().uuid()).min(1, "Select at least one stream"),
+  isActive: z.boolean().optional(),
+  isPublished: z.boolean().optional(),
 });
 
 type TestSeriesFormInput = z.infer<typeof testSeriesFormSchema>;
@@ -73,11 +67,21 @@ function useMediaQuery(query: string): boolean {
   return matches;
 }
 
-interface CreateTestSeriesDialogProps {
+function formatToDatetimeLocal(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const pad = (num: number) => String(num).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+interface EditTestSeriesDialogProps {
+  testSeries: TestSeries;
+  linkedStreamIds: string[];
   children?: React.ReactNode;
 }
 
-export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps) {
+export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: EditTestSeriesDialogProps) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -85,7 +89,7 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
   const { data: exams, isLoading: isExamsLoading } = useExamsQuery({ isActive: true });
   const { data: streams, isLoading: isStreamsLoading } = useStreamsQuery();
 
-  const createMutation = useCreateTestSeriesMutation();
+  const updateMutation = useUpdateTestSeriesMutation();
 
   const form = useForm<TestSeriesFormInput>({
     resolver: zodResolver(testSeriesFormSchema as any),
@@ -98,8 +102,28 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
       endDate: "",
       examId: "",
       streamId: [],
+      isActive: false,
+      isPublished: false,
     },
   });
+
+  // Prefill form values when open/props change
+  useEffect(() => {
+    if (testSeries && open) {
+      form.reset({
+        name: testSeries.name,
+        description: testSeries.description || "",
+        banner: testSeries.banner || "",
+        price: testSeries.price,
+        startDate: testSeries.startDate ? formatToDatetimeLocal(testSeries.startDate) : "",
+        endDate: testSeries.endDate ? formatToDatetimeLocal(testSeries.endDate) : "",
+        examId: testSeries.examId,
+        streamId: linkedStreamIds || [],
+        isActive: testSeries.isActive,
+        isPublished: testSeries.isPublished,
+      });
+    }
+  }, [testSeries, linkedStreamIds, open, form]);
 
   const selectedStreams = form.watch("streamId") || [];
 
@@ -115,43 +139,42 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
   };
 
   const onSubmit = (data: TestSeriesFormInput) => {
-    const payload: CreateTestSeriesInput = {
+    const payload: any = {
       name: data.name,
-      description: data.description || undefined,
-      banner: data.banner || undefined,
+      description: data.description || null,
+      banner: data.banner || null,
       price: data.price,
-      startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
-      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+      startDate: data.startDate ? new Date(data.startDate).toISOString() : null,
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : null,
       examId: data.examId,
       streamId: data.streamId,
+      isActive: data.isActive,
+      isPublished: data.isPublished,
     };
 
-    createMutation.mutate(payload, {
-      onSuccess: () => {
-        setOpen(false);
-        form.reset();
-      },
-    });
+    updateMutation.mutate(
+      { testSeriesId: testSeries.id, data: payload },
+      {
+        onSuccess: () => {
+          setOpen(false);
+        },
+      }
+    );
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    if (!newOpen) {
-      form.reset();
-    }
   };
 
   const triggerBtn = children || (
-    <Button className="font-bold text-xs h-9">
-      <Plus className="h-4 w-4 mr-1.5" />
-      Create Test Series
+    <Button variant="outline" size="icon" className="h-9.5 w-9.5 rounded-xl border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer">
+      <Pencil className="h-4 w-4" />
     </Button>
   );
 
   const formContent = (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-3">
       <FieldGroup className="space-y-6">
-        
         {/* Section 1: Basic Info */}
         <div className="space-y-4">
           <div className="border-b border-border/60 pb-1.5">
@@ -328,6 +351,41 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
             </Field>
           </div>
         </div>
+
+        {/* Section 4: Status Settings */}
+        <div className="space-y-4">
+          <div className="border-b border-border/60 pb-1.5">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/80">Status Settings</h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* isActive Checkbox */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+              <div className="space-y-0.5 select-none">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Active Status</label>
+                <p className="text-[10px] text-muted-foreground">Enable test series access for students.</p>
+              </div>
+              <input
+                type="checkbox"
+                {...form.register("isActive")}
+                className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* isPublished Checkbox */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+              <div className="space-y-0.5 select-none">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Published Status</label>
+                <p className="text-[10px] text-muted-foreground">Display test series publicly to everyone.</p>
+              </div>
+              <input
+                type="checkbox"
+                {...form.register("isPublished")}
+                className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
       </FieldGroup>
 
       {/* Action buttons */}
@@ -343,50 +401,35 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
         <Button
           type="submit"
           className="h-10 font-bold px-6"
-          disabled={createMutation.isPending}
+          disabled={updateMutation.isPending}
         >
-          {createMutation.isPending && (
+          {updateMutation.isPending && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Create Test Series
+          Save Changes
         </Button>
       </div>
     </form>
   );
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{triggerBtn}</DialogTrigger>
-        <DialogContent className="sm:max-w-[650px] md:max-w-[720px] w-[95vw] sm:p-8 p-6 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <DialogHeader className="mb-2">
-            <div className="flex items-center gap-2 text-primary">
-              
-              <DialogTitle className="text-xl font-bold">Create New Test Series</DialogTitle>
-            </div>
-            <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Build a comprehensive test series. Group, target, and schedule details below.
-            </DialogDescription>
-          </DialogHeader>
-          {formContent}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>{triggerBtn}</SheetTrigger>
       <SheetContent
-        side="bottom"
-        className="!h-[75vh] !max-h-[75vh] w-full rounded-t-[20px] p-6 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-t border-border"
+        side={isDesktop ? "right" : "bottom"}
+        className={`w-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-border ${
+          isDesktop 
+            ? "sm:max-w-xl md:max-w-2xl border-l p-8" 
+            : "!h-[75vh] !max-h-[75vh] rounded-t-[20px] p-6 border-t"
+        }`}
       >
         <SheetHeader className="mb-2 p-0">
           <div className="flex items-center gap-2 text-primary">
-            <SheetTitle className="text-lg font-bold">Create New Test Series</SheetTitle>
+            <Sparkles className="h-5 w-5 animate-pulse" />
+            <SheetTitle className="text-lg font-bold">Edit Test Series</SheetTitle>
           </div>
           <SheetDescription className="text-xs text-muted-foreground mt-1">
-            Build a comprehensive test series. Group, target, and schedule details below.
+            Update test series details, linked streams, and schedule.
           </SheetDescription>
         </SheetHeader>
         {formContent}

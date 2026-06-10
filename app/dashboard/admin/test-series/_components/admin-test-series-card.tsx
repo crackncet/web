@@ -3,8 +3,9 @@
 import React from "react";
 import { TestSeries } from "../_api/test-series.api";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Tag, Sparkles } from "lucide-react";
+import { Calendar, Tag, Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EditTestSeriesDialog } from "./edit-test-series-dialog";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -76,20 +77,29 @@ export function AdminTestSeriesCard({ testSeries, examName }: AdminTestSeriesCar
 
         <div className="space-y-3.5 mt-1">
           {/* Centered Name & Active Status Dot */}
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-1.5">
             <div className="flex items-center justify-center gap-2">
               <span className={`h-2 w-2 rounded-full shrink-0 ${testSeries.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
               <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 tracking-tight leading-snug line-clamp-1 group-hover:text-primary transition-colors">
                 {testSeries.name}
               </h3>
             </div>
-            <span className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
-              testSeries.isActive 
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
-                : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-            }`}>
-              {testSeries.isActive ? "Active" : "Inactive"}
-            </span>
+            <div className="flex items-center justify-center gap-1.5">
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                testSeries.isActive 
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
+                  : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+              }`}>
+                {testSeries.isActive ? "Active" : "Inactive"}
+              </span>
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                testSeries.isPublished 
+                  ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" 
+                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              }`}>
+                {testSeries.isPublished ? "Published" : "Unpublished"}
+              </span>
+            </div>
           </div>
 
           {/* Centered Description */}
@@ -99,6 +109,22 @@ export function AdminTestSeriesCard({ testSeries, examName }: AdminTestSeriesCar
 
           {/* Divider Line */}
           <div className="w-full h-px bg-slate-100 dark:bg-slate-800/60 my-3.5" />
+
+          {/* Stream Tags */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 min-h-[20px]">
+            {testSeries.streams && testSeries.streams.length > 0 ? (
+              testSeries.streams.map((stream, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border border-slate-150 dark:border-slate-800/40"
+                >
+                  {stream}
+                </span>
+              ))
+            ) : (
+              <span className="text-[9px] text-muted-foreground/45 italic">No streams</span>
+            )}
+          </div>
         </div>
 
         {/* Dates and Price */}
@@ -124,6 +150,17 @@ export function AdminTestSeriesCard({ testSeries, examName }: AdminTestSeriesCar
                 View Details
               </Button>
             </Link>
+
+            <EditTestSeriesDialog testSeries={testSeries} linkedStreamIds={testSeries.streamIds || []}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9.5 w-9.5 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shrink-0 shadow-2xs transition-colors rounded-xl"
+                title="Edit Test Series"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </EditTestSeriesDialog>
           </div>
         </div>
       </CardContent>
