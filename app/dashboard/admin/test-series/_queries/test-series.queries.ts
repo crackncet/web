@@ -10,6 +10,7 @@ import {
   getTestSeriesTests,
   addTestSeriesTests,
   CreateTestsInput,
+  getAdminTestSubjects,
 } from "../_api/test-series.api";
 import { toast } from "sonner";
 
@@ -95,5 +96,15 @@ export function useAddTestSeriesTestsMutation(testSeriesId: string) {
     },
   });
 }
+
+export function useAdminTestSubjectsQuery(testSeriesId: string, testId: string) {
+  return useQuery({
+    queryKey: [...TEST_SERIES_QUERY_KEYS.all, "testSubjects", testSeriesId, testId],
+    queryFn: () => getAdminTestSubjects(testSeriesId, testId),
+    enabled: !!testSeriesId && !!testId,
+    staleTime: 5000,
+  });
+}
+
 
 

@@ -2,20 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useTestSeriesTestsQuery } from "../../_queries/test-series.queries";
+import { useMemberTestSeriesTestsQuery } from "../../_queries/test-series.queries";
 import { TestSeriesDetail } from "../../_api/test-series.api";
-import { AddTestsDialog } from "./add-tests-dialog";
 import {
   FileText,
   Calendar,
   Clock,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -26,19 +24,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface TestsListSectionProps {
+interface MemberTestsListSectionProps {
   testSeriesId: string;
   detail: TestSeriesDetail;
 }
 
-export function TestsListSection({
+export function MemberTestsListSection({
   testSeriesId,
   detail,
-}: TestsListSectionProps) {
+}: MemberTestsListSectionProps) {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const { data: response, isLoading, isPlaceholderData } = useTestSeriesTestsQuery(
+  const { data: response, isLoading, isPlaceholderData } = useMemberTestSeriesTestsQuery(
     testSeriesId,
     { page, limit }
   );
@@ -85,17 +83,12 @@ export function TestsListSection({
 
   return (
     <div className="space-y-4">
-      {/* Header and Add Button */}
+      {/* Header */}
       <div className="flex items-center justify-between select-none border-b border-slate-150 dark:border-slate-800 pb-3">
-        <h3 className="text-sm font-bold text-slate-850 dark:text-slate-200 tracking-wider uppercase flex items-center gap-2">
+        <h3 className="text-sm font-bold text-slate-855 dark:text-slate-200 tracking-wider uppercase flex items-center gap-2">
           <ClipboardList className="h-4.5 w-4.5 text-primary" />
           Test Schedules ({meta.total})
         </h3>
-        <AddTestsDialog
-          testSeriesId={testSeriesId}
-          isActive={detail.isActive}
-          startDate={detail.startDate}
-        />
       </div>
 
       {isLoading ? (
@@ -112,7 +105,6 @@ export function TestsListSection({
           <h4 className="font-bold text-sm text-foreground">No Tests Created</h4>
           <p className="text-xs text-muted-foreground max-w-sm mt-1 leading-relaxed">
             There are no tests under this test series yet.
-            {!detail.isActive && " Click the button above to add new tests."}
           </p>
         </Card>
       ) : (
@@ -146,12 +138,11 @@ export function TestsListSection({
                       <TableCell className="align-middle px-4 py-3.5 max-w-xs sm:max-w-sm md:max-w-md">
                         <div className="space-y-1">
                           <Link
-                            href={`/dashboard/admin/test-series/${testSeriesId}/tests/${test.id}`}
+                            href={`/dashboard/member/test-series/${testSeriesId}/tests/${test.id}`}
                             className="text-xs font-bold text-primary hover:underline block truncate"
                           >
                             {test.name}
                           </Link>
-                        
                         </div>
                       </TableCell>
                       <TableCell className="align-middle px-4 py-3.5">

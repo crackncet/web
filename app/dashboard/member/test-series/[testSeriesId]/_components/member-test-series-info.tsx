@@ -2,14 +2,11 @@
 
 import React from "react";
 import { TestSeriesDetail } from "../../_api/test-series.api";
-import { EditTestSeriesDialog } from "../../_components/edit-test-series-dialog";
-import { Calendar, Tag, Sparkles, Shield, AlertCircle, Pencil } from "lucide-react";
+import { Calendar, Tag, Sparkles, Shield } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 
-interface TestSeriesInfoProps {
+interface MemberTestSeriesInfoProps {
   detail: TestSeriesDetail;
-  examName: string;
 }
 
 export function getTestSeriesStatus(
@@ -29,7 +26,7 @@ export function getTestSeriesStatus(
   return "UNPUBLISHED";
 }
 
-export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
+export function MemberTestSeriesInfo({ detail }: MemberTestSeriesInfoProps) {
   const calculatedStatus = getTestSeriesStatus(
     detail.isActive,
     detail.isPublished,
@@ -48,26 +45,6 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
         year: "numeric",
       })}`
     : "Flexible Dates";
-
-  // Convert TestSeriesDetail to TestSeries for EditTestSeriesDialog compatibility
-  const testSeriesObj = {
-    id: detail.id,
-    examId: detail.examId,
-    examName: detail.examName,
-    name: detail.name,
-    description: detail.description,
-    banner: detail.banner,
-    price: detail.price,
-    startDate: detail.startDate,
-    endDate: detail.endDate,
-    isActive: detail.isActive,
-    isPublished: detail.isPublished,
-    createdAt: detail.createdAt,
-    updatedAt: detail.updatedAt,
-    status: calculatedStatus,
-  };
-
-  const streamIds = detail.streams.map((s) => s.streamId);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col md:flex-row gap-6 p-6">
@@ -89,7 +66,7 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
         )}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1">
           <span className="inline-flex px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded bg-white/95 text-slate-800 shadow-xs border border-slate-200/40 backdrop-blur-xs select-none">
-            {examName}
+            {detail.examName || "Exam"}
           </span>
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[8px] font-bold rounded bg-slate-950/85 text-white backdrop-blur-xs select-none uppercase tracking-wider shadow-xs">
             {calculatedStatus}
@@ -126,18 +103,6 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
                 </span>
               </div>
             </div>
-
-            {/* Edit Button */}
-            <EditTestSeriesDialog testSeries={testSeriesObj} linkedStreamIds={streamIds}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs font-bold gap-1 rounded-xl border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer shadow-2xs"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Edit Info
-              </Button>
-            </EditTestSeriesDialog>
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">

@@ -27,19 +27,7 @@ export interface ListTestSeriesQuery {
   status?: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
 }
 
-export interface CreateTestSeriesInput {
-  examId: string;
-  name: string;
-  description?: string;
-  banner?: string;
-  price: string;
-  startDate?: string;
-  endDate?: string;
-  isPublished?: boolean;
-  streamId: string[];
-}
-
-export async function getAdminTestSeries(filters: ListTestSeriesQuery = {}) {
+export async function getMemberTestSeries(filters: ListTestSeriesQuery = {}) {
   const params: Record<string, string | number> = {};
   if (filters.page) params.page = filters.page;
   if (filters.limit) params.limit = filters.limit;
@@ -48,37 +36,8 @@ export async function getAdminTestSeries(filters: ListTestSeriesQuery = {}) {
   if (filters.status) params.status = filters.status;
 
   const response = await apiClient.get<ApiSuccessResponse<TestSeries[]>>(
-    "/test-series/admin-view",
+    "/test-series/member-view",
     { params }
-  );
-  return response.data;
-}
-
-export async function createTestSeries(data: CreateTestSeriesInput) {
-  const response = await apiClient.post<ApiSuccessResponse<TestSeries>>(
-    "/test-series",
-    data
-  );
-  return response.data;
-}
-
-export interface UpdateTestSeriesInput {
-  examId?: string;
-  name?: string;
-  description?: string | null;
-  banner?: string | null;
-  price?: string;
-  startDate?: string | null;
-  endDate?: string | null;
-  isActive?: boolean;
-  isPublished?: boolean;
-  streamId?: string[];
-}
-
-export async function updateTestSeries(testSeriesId: string, data: UpdateTestSeriesInput) {
-  const response = await apiClient.patch<ApiSuccessResponse<TestSeries>>(
-    `/test-series/${testSeriesId}/info`,
-    data
   );
   return response.data;
 }
@@ -113,23 +72,14 @@ export interface TestSeriesTest {
   durationMinutes: number | null;
 }
 
-export interface CreateTestsInput {
-  tests: {
-    name: string;
-    description?: string;
-    scheduledAt: string; // ISO date string
-    durationMinutes: number;
-  }[];
-}
-
-export async function getTestSeriesDetail(testSeriesId: string) {
+export async function getMemberTestSeriesDetail(testSeriesId: string) {
   const response = await apiClient.get<ApiSuccessResponse<TestSeriesDetail>>(
     `/test-series/${testSeriesId}/info`
   );
   return response.data;
 }
 
-export async function getTestSeriesTests(testSeriesId: string, query: { page?: number; limit?: number } = {}) {
+export async function getMemberTestSeriesTests(testSeriesId: string, query: { page?: number; limit?: number } = {}) {
   const params: Record<string, string | number> = {};
   if (query.page) params.page = query.page;
   if (query.limit) params.limit = query.limit;
@@ -141,10 +91,45 @@ export async function getTestSeriesTests(testSeriesId: string, query: { page?: n
   return response.data;
 }
 
-export async function addTestSeriesTests(testSeriesId: string, data: CreateTestsInput) {
-  const response = await apiClient.post<ApiSuccessResponse<TestSeriesTest[]>>(
-    `/test-series/${testSeriesId}/tests`,
-    data
+export interface TeachingStaffListItem {
+  id: string;
+  role: "TEACHER" | "TA";
+  collegeName: string;
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    profileImage: string | null;
+  };
+  subject: {
+    id: string;
+    name: string;
+    type: string;
+  };
+  stream: {
+    id: string;
+    name: string;
+  };
+}
+
+export async function getMemberTeachingStaffList(filters: { role?: "TEACHER" | "TA" } = {}) {
+  const params = new URLSearchParams();
+  if (filters.role) params.append("role", filters.role);
+
+  const response = await apiClient.get<ApiSuccessResponse<TeachingStaffListItem[]>>(
+    `/staffs/teaching?${params.toString()}`
+  );
+  return response.data;
+}
+
+export async function addMemberSubjectsFaculty(
+  testSeriesId: string,
+  streamId: string,
+  teachingStaffIds: string[]
+) {
+  const response = await apiClient.post<ApiSuccessResponse<null>>(
+    `/test-series/${testSeriesId}/streams/${streamId}/subjects-faculty`,
+    { teachingStaffIds }
   );
   return response.data;
 }
@@ -159,11 +144,50 @@ export interface TestSubject {
   } | null;
 }
 
-export async function getAdminTestSubjects(testSeriesId: string, testId: string) {
+export interface LibraryQuestionBank {
+  id: string;
+  subjectId: string;
+  subjectName: string | null;
+  title: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getMemberTestSubjects(testSeriesId: string, testId: string) {
   const response = await apiClient.get<ApiSuccessResponse<TestSubject[]>>(
     `/test-series/${testSeriesId}/tests/${testId}/subjects`
   );
   return response.data;
 }
 
+export async function addMemberQuestionBank(
+  testSeriesId: string,
+  testId: string,
+  subjectId: string,
+  questionBankId: string
+) {
+  const response = await apiClient.post<ApiSuccessResponse<null>>(
+    `/test-series/${testSeriesId}/tests/${testId}/subjects/${subjectId}/addQuestionBank`,
+    { questionBankId }
+  );
+  return response.data;
+}
+
+export async function getLibraryQuestionBanks(subjectId: string, search?: string) {
+  const params: Record<string, string | number> = {
+    subjectId,
+    limit: 3,
+    isActive: "true",
+  };
+  if (search?.trim()) {
+    params.search = search.trim();
+  }
+
+  const response = await apiClient.get<ApiSuccessResponse<LibraryQuestionBank[]>>(
+    "/library/question-banks",
+    { params }
+  );
+  return response.data;
+}
 

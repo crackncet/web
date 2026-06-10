@@ -12,9 +12,10 @@ interface QuestionItemRowProps {
   index: number;
   bankId?: string; // If passed, enables database updates
   onUpdateInMemory?: (updatedQuestion: any) => void; // If passed, updates parent memory state
+  readOnly?: boolean;
 }
 
-export function QuestionItemRow({ question, index, bankId, onUpdateInMemory }: QuestionItemRowProps) {
+export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, readOnly = false }: QuestionItemRowProps) {
   const params = useParams();
   const resolvedBankId = bankId || (params?.bankId as string);
 
@@ -55,7 +56,7 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory }: Q
           <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Q. {index}</span>
           <span className="h-3.5 w-px bg-slate-200 dark:bg-slate-800" />
           <span className="font-semibold text-primary">{typeLabels[question.type] || question.type}</span>
-          {(resolvedBankId || onUpdateInMemory) && (
+          {!readOnly && (resolvedBankId || onUpdateInMemory) && (
             <>
               <Button
                 variant="ghost"

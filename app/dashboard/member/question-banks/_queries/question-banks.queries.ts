@@ -3,10 +3,12 @@ import {
   getQuestionBanks,
   createQuestionBank,
   getQuestionBankDetail,
+  getSharedQuestionBankDetail,
   updateQuestionBank,
   createQuestionBankSection,
   updateQuestionBankSection,
   getSectionQuestions,
+  getSharedSectionQuestions,
   previewQuestions,
   getPreviewStatus,
   uploadQuestions,
@@ -186,5 +188,21 @@ export function useReuseQuestion(bankId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUESTION_BANKS_KEYS.all });
     },
+  });
+}
+
+export function useSharedQuestionBankDetail(bankId: string, page = 1, limit = 20) {
+  return useQuery({
+    queryKey: [...QUESTION_BANKS_KEYS.details(), "shared", bankId, { page, limit }] as const,
+    queryFn: () => getSharedQuestionBankDetail(bankId, page, limit),
+    enabled: !!bankId,
+  });
+}
+
+export function useSharedSectionQuestions(bankId: string, sectionId: string, page = 1, limit = 20) {
+  return useQuery({
+    queryKey: [...QUESTION_BANKS_KEYS.all, "shared-section-questions", bankId, sectionId, { page, limit }] as const,
+    queryFn: () => getSharedSectionQuestions(bankId, sectionId, page, limit),
+    enabled: !!bankId && !!sectionId,
   });
 }

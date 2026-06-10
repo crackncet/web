@@ -143,6 +143,13 @@ export async function getQuestionBankDetail(bankId: string, page = 1, limit = 20
   return response.data;
 }
 
+export async function getSharedQuestionBankDetail(bankId: string, page = 1, limit = 20) {
+  const response = await apiClient.get<ApiSuccessResponse<QuestionBankDetail>>(
+    `/library/question-banks/shared/${bankId}?page=${page}&limit=${limit}`
+  );
+  return response.data;
+}
+
 export async function updateQuestionBank(bankId: string, body: UpdateQuestionBankInput) {
   const response = await apiClient.patch<ApiSuccessResponse<QuestionBank>>(
     `/library/question-banks/${bankId}`,
@@ -179,6 +186,18 @@ export async function getSectionQuestions(
 ) {
   const response = await apiClient.get<ApiSuccessResponse<{ bankId: string; sectionId: string; questions: Question[] }>>(
     `/library/question-banks/${bankId}/sections/${sectionId}/questions?page=${page}&limit=${limit}`
+  );
+  return response.data;
+}
+
+export async function getSharedSectionQuestions(
+  bankId: string,
+  sectionId: string,
+  page = 1,
+  limit = 20
+) {
+  const response = await apiClient.get<ApiSuccessResponse<{ bankId: string; sectionId: string; questions: Question[] }>>(
+    `/library/question-banks/shared/${bankId}/sections/${sectionId}/questions?page=${page}&limit=${limit}`
   );
   return response.data;
 }
