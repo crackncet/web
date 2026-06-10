@@ -8,6 +8,7 @@ import {
   updateNote,
   updateVideo,
   deleteMediaAsset,
+  getSharedAssetDetail,
   ListNotesQuery,
 } from "../_api/media.api";
 
@@ -102,5 +103,13 @@ export function useDeleteMediaAssetMutation() {
         queryKey: MEDIA_QUERY_KEYS.all,
       });
     },
+  });
+}
+
+export function useSharedAssetDetailQuery(assetId: string) {
+  return useQuery({
+    queryKey: [...MEDIA_QUERY_KEYS.all, "shared-detail", assetId] as const,
+    queryFn: () => getSharedAssetDetail(assetId),
+    enabled: !!assetId,
   });
 }

@@ -118,3 +118,10 @@ export async function deleteMediaAsset(assetId: string) {
   );
   return response.data;
 }
+
+export async function getSharedAssetDetail(assetId: string) {
+  const response = await apiClient.get<ApiSuccessResponse<MediaAsset & { url: string }>>(
+    `/library/mediaAssets/shared/${assetId}`
+  );
+  return response.data;
+}

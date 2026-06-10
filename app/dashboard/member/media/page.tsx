@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { MemberHeader } from "../layout";
 import {
   useMySubjectsQuery,
@@ -312,9 +313,9 @@ export default function MediaPage() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button size="sm" variant="ghost" className="h-8 w-8 p-0 cursor-pointer" asChild>
-                          <a href={note.storageUrl} target="_blank" rel="noopener noreferrer" title="View note">
+                          <Link href={`/dashboard/member/media/${note.id}/view`} title="View note">
                             <Play className="h-4 w-4 text-slate-500 hover:text-primary fill-none" />
-                          </a>
+                          </Link>
                         </Button>
                         <Button
                           size="sm"
@@ -453,9 +454,9 @@ export default function MediaPage() {
                           asChild={vid.status === "READY"}
                         >
                           {vid.status === "READY" ? (
-                            <a href={vid.storageUrl} target="_blank" rel="noopener noreferrer" title="Play lecture">
+                            <Link href={`/dashboard/member/media/${vid.id}/view`} title="Play lecture">
                               <Play className="h-4 w-4 text-slate-500 hover:text-primary fill-none" />
-                            </a>
+                            </Link>
                           ) : (
                             <Play className="h-4 w-4 text-slate-300 dark:text-slate-700 cursor-not-allowed" />
                           )}

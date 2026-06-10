@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { BookOpen, Edit2, Loader2, Plus, Save, X, FileText, BarChart2, Eye, Radio, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -476,24 +477,42 @@ export default function ChapterDetailWorkspace({
             </div>
 
             <div className="grid grid-cols-2 gap-2 mt-1">
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-955/10 px-2.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
-                <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Chapter Note</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate" title={linkedNote?.name || chapterData.notesAssetName || undefined}>
-                    {linkedNote ? linkedNote.name : chapterData.notesAssetName ? chapterData.notesAssetName : chapterData.notesAssetId ? "Linked Note" : "Not linked yet"}
-                  </span>
+              <div className="flex items-center justify-between bg-white dark:bg-slate-955/10 px-2.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Chapter Note</span>
+                    <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate" title={linkedNote?.name || chapterData.notesAssetName || undefined}>
+                      {linkedNote ? linkedNote.name : chapterData.notesAssetName ? chapterData.notesAssetName : chapterData.notesAssetId ? "Linked Note" : "Not linked yet"}
+                    </span>
+                  </div>
                 </div>
+                {chapterData.notesAssetId && (
+                  <Link href={`/dashboard/member/media/${chapterData.notesAssetId}/view`}>
+                    <Button size="icon-xs" variant="ghost" className="h-5 w-5 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Note">
+                      <Eye className="h-3 w-3 text-slate-500" />
+                    </Button>
+                  </Link>
+                )}
               </div>
 
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-955/10 px-2.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
-                <BarChart2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Practice Bank</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate" title={linkedQb?.title || chapterData.chapterPracticeBankTitle || undefined}>
-                    {linkedQb ? linkedQb.title : chapterData.chapterPracticeBankTitle ? chapterData.chapterPracticeBankTitle : chapterData.chapterPracticeBankId ? "Linked Practice Bank" : "Not linked yet"}
-                  </span>
+              <div className="flex items-center justify-between bg-white dark:bg-slate-955/10 px-2.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
+                <div className="flex items-center gap-2 min-w-0">
+                  <BarChart2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Practice Bank</span>
+                    <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate" title={linkedQb?.title || chapterData.chapterPracticeBankTitle || undefined}>
+                      {linkedQb ? linkedQb.title : chapterData.chapterPracticeBankTitle ? chapterData.chapterPracticeBankTitle : chapterData.chapterPracticeBankId ? "Linked Practice Bank" : "Not linked yet"}
+                    </span>
+                  </div>
                 </div>
+                {chapterData.chapterPracticeBankId && (
+                  <Link href={`/dashboard/member/question-banks/${chapterData.chapterPracticeBankId}/view`}>
+                    <Button size="icon-xs" variant="ghost" className="h-5 w-5 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Practice Bank">
+                      <Eye className="h-3 w-3 text-slate-500" />
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -786,14 +805,23 @@ export default function ChapterDetailWorkspace({
                   </div>
 
                   <div className="grid grid-cols-2 gap-3.5">
-                    <div className="flex items-center gap-3 bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
-                      <Video className="h-4 w-4 text-slate-400 shrink-0" />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Video Lecture</span>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.videoLectureTitle || undefined}>
-                          {topicDetail.videoLectureTitle || (topicDetail.videoLectureId ? "Linked Video" : "Not linked")}
-                        </span>
+                    <div className="flex items-center justify-between bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Video className="h-4 w-4 text-slate-400 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Video Lecture</span>
+                          <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.videoLectureTitle || undefined}>
+                            {topicDetail.videoLectureTitle || (topicDetail.videoLectureId ? "Linked Video" : "Not linked")}
+                          </span>
+                        </div>
                       </div>
+                      {topicDetail.videoLectureId && (
+                        <Link href={`/dashboard/member/media/${topicDetail.videoLectureId}/view`}>
+                          <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Video">
+                            <Eye className="h-3.5 w-3.5 text-slate-500" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
@@ -806,24 +834,42 @@ export default function ChapterDetailWorkspace({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
-                      <FileText className="h-4 w-4 text-slate-400 shrink-0" />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Study Note</span>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.notesAssetTitle || undefined}>
-                          {topicDetail.notesAssetTitle || (topicDetail.notesAssetId ? "Linked Note" : "Not linked")}
-                        </span>
+                    <div className="flex items-center justify-between bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Study Note</span>
+                          <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.notesAssetTitle || undefined}>
+                            {topicDetail.notesAssetTitle || (topicDetail.notesAssetId ? "Linked Note" : "Not linked")}
+                          </span>
+                        </div>
                       </div>
+                      {topicDetail.notesAssetId && (
+                        <Link href={`/dashboard/member/media/${topicDetail.notesAssetId}/view`}>
+                          <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Note">
+                            <Eye className="h-3.5 w-3.5 text-slate-500" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-3 bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
-                      <BarChart2 className="h-4 w-4 text-slate-400 shrink-0" />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">DPP Bank</span>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.dppBankTitle || undefined}>
-                          {topicDetail.dppBankTitle || (topicDetail.dppBankId ? "Linked DPP" : "Not linked")}
-                        </span>
+                    <div className="flex items-center justify-between bg-slate-50/50 dark:bg-slate-955/10 px-3.5 py-3 rounded-lg border border-slate-200/50 dark:border-slate-850/80">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <BarChart2 className="h-4 w-4 text-slate-400 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">DPP Bank</span>
+                          <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate mt-0.5" title={topicDetail.dppBankTitle || undefined}>
+                            {topicDetail.dppBankTitle || (topicDetail.dppBankId ? "Linked DPP" : "Not linked")}
+                          </span>
+                        </div>
                       </div>
+                      {topicDetail.dppBankId && (
+                        <Link href={`/dashboard/member/question-banks/${topicDetail.dppBankId}/view`}>
+                          <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View DPP">
+                            <Eye className="h-3.5 w-3.5 text-slate-500" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
