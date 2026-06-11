@@ -12,6 +12,7 @@ export interface TestSeries {
   endDate: string | null;
   isActive: boolean;
   isPublished: boolean;
+  isEnrollmentOpen: boolean;
   createdAt: string;
   updatedAt: string;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
@@ -36,6 +37,7 @@ export interface CreateTestSeriesInput {
   startDate?: string;
   endDate?: string;
   isPublished?: boolean;
+  isEnrollmentOpen?: boolean;
   streamId: string[];
 }
 
@@ -72,6 +74,7 @@ export interface UpdateTestSeriesInput {
   endDate?: string | null;
   isActive?: boolean;
   isPublished?: boolean;
+  isEnrollmentOpen?: boolean;
   streamId?: string[];
 }
 

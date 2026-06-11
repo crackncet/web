@@ -48,11 +48,12 @@ const testSeriesFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
   description: z.string().optional(),
   banner: z.string().url("Banner must be a valid URL").or(z.literal("")).optional(),
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 1999 or 1999.99)"),
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 999 or 999.99)"),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   examId: z.string().uuid("Please select an exam"),
   streamId: z.array(z.string().uuid()).min(1, "Select at least one stream"),
+  isEnrollmentOpen: z.boolean().optional(),
 });
 
 type TestSeriesFormInput = z.infer<typeof testSeriesFormSchema>;
@@ -98,6 +99,7 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
       endDate: "",
       examId: "",
       streamId: [],
+      isEnrollmentOpen: false,
     },
   });
 
@@ -124,6 +126,7 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
       endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
       examId: data.examId,
       streamId: data.streamId,
+      isEnrollmentOpen: data.isEnrollmentOpen,
     };
 
     createMutation.mutate(payload, {
@@ -326,6 +329,28 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
                 <FieldError>{form.formState.errors.endDate.message}</FieldError>
               )}
             </Field>
+          </div>
+        </div>
+
+        {/* Section 4: Status Settings */}
+        <div className="space-y-4">
+          <div className="border-b border-border/60 pb-1.5">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/80">Status Settings</h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* isEnrollmentOpen Checkbox */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+              <div className="space-y-0.5 select-none">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Enrollment Open</label>
+                <p className="text-[10px] text-muted-foreground">Allow new signups.</p>
+              </div>
+              <input
+                type="checkbox"
+                {...form.register("isEnrollmentOpen")}
+                className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
           </div>
         </div>
       </FieldGroup>

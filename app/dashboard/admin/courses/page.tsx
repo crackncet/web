@@ -151,6 +151,7 @@ export default function CourseAdminPage() {
                 status: "ONGOING" as const,
                 isActive: true,
                 isPublished: true,
+                isEnrollmentOpen: true,
                 isFeatured: true,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),

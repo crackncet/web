@@ -62,6 +62,7 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
     endDate: detail.endDate,
     isActive: detail.isActive,
     isPublished: detail.isPublished,
+    isEnrollmentOpen: detail.isEnrollmentOpen,
     createdAt: detail.createdAt,
     updatedAt: detail.updatedAt,
     status: calculatedStatus,
@@ -109,7 +110,7 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
                 </h2>
               </div>
               
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
                   detail.isActive 
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
@@ -123,6 +124,13 @@ export function TestSeriesInfo({ detail, examName }: TestSeriesInfoProps) {
                     : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                 }`}>
                   {detail.isPublished ? "Published" : "Unpublished"}
+                </span>
+                <span className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                  detail.isEnrollmentOpen 
+                    ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                }`}>
+                  {detail.isEnrollmentOpen ? "Enrollment Open" : "Enrollment Closed"}
                 </span>
               </div>
             </div>

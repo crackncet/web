@@ -10,7 +10,7 @@ import { useExamsQuery } from "../../metadata/_queries/exams.queries";
 import { useStreamsQuery } from "../../metadata/_queries/streams.queries";
 import { useCreateCourseMutation } from "../_queries/courses.queries";
 import { CreateCourseInput } from "../_api/courses.api";
-import { Loader2, Plus, Sparkles, X } from "lucide-react";
+import { Loader2, Plus, Sparkles, X, Video } from "lucide-react";
 import { FileUploader } from "@/components/ui/file-uploader";
 
 import {
@@ -50,6 +50,7 @@ const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().optional(),
   banner: z.string().url("Banner must be a valid URL").or(z.literal("")).optional(),
+  demoVideos: z.array(z.string()).optional(),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 1999 or 1999.99)"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
@@ -112,6 +113,7 @@ export function CreateCourseDialog({ children }: CreateCourseDialogProps) {
       title: "",
       description: "",
       banner: "",
+      demoVideos: [],
       price: "",
       startDate: "",
       endDate: "",
@@ -139,6 +141,7 @@ export function CreateCourseDialog({ children }: CreateCourseDialogProps) {
       title: data.title,
       description: data.description || undefined,
       banner: data.banner || undefined,
+      demoVideos: data.demoVideos || [],
       price: data.price,
       startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
       endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
@@ -237,6 +240,49 @@ export function CreateCourseDialog({ children }: CreateCourseDialogProps) {
             )}
             {form.formState.errors.banner && (
               <FieldError>{form.formState.errors.banner.message}</FieldError>
+            )}
+          </Field>
+
+          {/* Demo Videos Upload */}
+          <Field>
+            <FieldLabel>Demo Videos</FieldLabel>
+            <div className="space-y-3">
+              {form.watch("demoVideos") && form.watch("demoVideos")!.length > 0 && (
+                <div className="grid grid-cols-1 gap-2.5">
+                  {form.watch("demoVideos")!.map((videoUrl, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-xl bg-muted/10">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Video className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-xs truncate max-w-[200px] sm:max-w-[400px]">
+                          {videoUrl.split("/").pop()}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = [...(form.getValues("demoVideos") || [])];
+                          current.splice(idx, 1);
+                          form.setValue("demoVideos", current, { shouldValidate: true });
+                        }}
+                        className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <FileUploader
+                accept="video/*"
+                onUploadComplete={(result) => {
+                  const current = [...(form.getValues("demoVideos") || [])];
+                  current.push(result.publicUrl);
+                  form.setValue("demoVideos", current, { shouldValidate: true });
+                }}
+              />
+            </div>
+            {form.formState.errors.demoVideos && (
+              <FieldError>{form.formState.errors.demoVideos.message}</FieldError>
             )}
           </Field>
         </div>

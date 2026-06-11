@@ -8,11 +8,13 @@ export interface Course {
   title: string;
   description: string | null;
   banner: string | null;
+  demoVideos?: string[] | null;
   price: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
   isPublished: boolean;
+  isEnrollmentOpen: boolean;
   createdAt: string;
   updatedAt: string;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
@@ -67,6 +69,7 @@ export interface CreateCourseInput {
   title: string;
   description?: string;
   banner?: string;
+  demoVideos?: string[];
   price: string;
   startDate?: string;
   endDate?: string;
@@ -105,7 +108,7 @@ export async function getFeaturedCourses() {
 
 export async function updateCourse(
   courseId: string,
-  data: Partial<CreateCourseInput> & { isActive?: boolean; isPublished?: boolean }
+  data: Partial<CreateCourseInput> & { isActive?: boolean; isPublished?: boolean; isEnrollmentOpen?: boolean }
 ) {
   const response = await apiClient.patch<ApiSuccessResponse<Course>>(
     `/courses/${courseId}`,

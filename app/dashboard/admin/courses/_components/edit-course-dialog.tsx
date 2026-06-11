@@ -10,7 +10,7 @@ import { useExamsQuery } from "../../metadata/_queries/exams.queries";
 import { useStreamsQuery } from "../../metadata/_queries/streams.queries";
 import { useUpdateCourseMutation } from "../_queries/courses.queries";
 import { Course } from "../_api/courses.api";
-import { Loader2, Sparkles, X, Pencil } from "lucide-react";
+import { Loader2, Sparkles, X, Pencil, Video } from "lucide-react";
 import { FileUploader } from "@/components/ui/file-uploader";
 
 import {
@@ -42,6 +42,7 @@ const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().optional(),
   banner: z.string().url("Banner must be a valid URL").or(z.literal("")).optional(),
+  demoVideos: z.array(z.string()).optional(),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Price must be a valid decimal number (e.g. 1999 or 1999.99)"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
@@ -50,6 +51,7 @@ const courseFormSchema = z.object({
   streamId: z.array(z.string().uuid()).min(1, "Select at least one stream"),
   isActive: z.boolean().optional(),
   isPublished: z.boolean().optional(),
+  isEnrollmentOpen: z.boolean().optional(),
 });
 
 type CourseFormInput = z.infer<typeof courseFormSchema>;
@@ -107,6 +109,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
       title: "",
       description: "",
       banner: "",
+      demoVideos: [],
       price: "",
       startDate: "",
       endDate: "",
@@ -115,6 +118,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
       streamId: [],
       isActive: false,
       isPublished: false,
+      isEnrollmentOpen: true,
     },
   });
 
@@ -129,6 +133,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
         title: course.title,
         description: course.description || "",
         banner: course.banner || "",
+        demoVideos: course.demoVideos || [],
         price: course.price,
         startDate: course.startDate ? new Date(course.startDate).toISOString().split("T")[0] : "",
         endDate: course.endDate ? new Date(course.endDate).toISOString().split("T")[0] : "",
@@ -137,6 +142,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
         streamId: initialStreams,
         isActive: course.isActive,
         isPublished: course.isPublished,
+        isEnrollmentOpen: course.isEnrollmentOpen ?? true,
       });
     }
   }, [course, streams, open, form]);
@@ -159,6 +165,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
       title: data.title,
       description: data.description || null,
       banner: data.banner || null,
+      demoVideos: data.demoVideos || [],
       price: data.price,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
@@ -166,6 +173,7 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
       streamId: data.streamId,
       isActive: data.isActive,
       isPublished: data.isPublished,
+      isEnrollmentOpen: data.isEnrollmentOpen,
       testSeriesId: data.testSeriesId === "NONE" || !data.testSeriesId ? null : data.testSeriesId,
     };
 
@@ -253,6 +261,49 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
             )}
             {form.formState.errors.banner && (
               <FieldError>{form.formState.errors.banner.message}</FieldError>
+            )}
+          </Field>
+
+          {/* Demo Videos Upload */}
+          <Field>
+            <FieldLabel>Demo Videos</FieldLabel>
+            <div className="space-y-3">
+              {form.watch("demoVideos") && form.watch("demoVideos")!.length > 0 && (
+                <div className="grid grid-cols-1 gap-2.5">
+                  {form.watch("demoVideos")!.map((videoUrl, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-xl bg-muted/10">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Video className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-xs truncate max-w-[200px] sm:max-w-[400px]">
+                          {videoUrl.split("/").pop()}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = [...(form.getValues("demoVideos") || [])];
+                          current.splice(idx, 1);
+                          form.setValue("demoVideos", current, { shouldValidate: true });
+                        }}
+                        className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <FileUploader
+                accept="video/*"
+                onUploadComplete={(result) => {
+                  const current = [...(form.getValues("demoVideos") || [])];
+                  current.push(result.publicUrl);
+                  form.setValue("demoVideos", current, { shouldValidate: true });
+                }}
+              />
+            </div>
+            {form.formState.errors.demoVideos && (
+              <FieldError>{form.formState.errors.demoVideos.message}</FieldError>
             )}
           </Field>
         </div>
@@ -399,12 +450,12 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
             <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/80">Status Settings</h4>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* isActive Checkbox */}
             <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
               <div className="space-y-0.5 select-none">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Active Status</label>
-                <p className="text-[10px] text-muted-foreground">Enable course materials and access.</p>
+                <p className="text-[10px] text-muted-foreground">Enable course materials.</p>
               </div>
               <input
                 type="checkbox"
@@ -417,11 +468,24 @@ export function EditCourseDialog({ course, children }: EditCourseDialogProps) {
             <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
               <div className="space-y-0.5 select-none">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Published Status</label>
-                <p className="text-[10px] text-muted-foreground">Make course visible to students.</p>
+                <p className="text-[10px] text-muted-foreground">Visible to students.</p>
               </div>
               <input
                 type="checkbox"
                 {...form.register("isPublished")}
+                className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* isEnrollmentOpen Checkbox */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+              <div className="space-y-0.5 select-none">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Enrollment Open</label>
+                <p className="text-[10px] text-muted-foreground">Allow new signups.</p>
+              </div>
+              <input
+                type="checkbox"
+                {...form.register("isEnrollmentOpen")}
                 className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
               />
             </div>

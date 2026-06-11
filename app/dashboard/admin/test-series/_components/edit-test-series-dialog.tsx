@@ -47,6 +47,7 @@ const testSeriesFormSchema = z.object({
   streamId: z.array(z.string().uuid()).min(1, "Select at least one stream"),
   isActive: z.boolean().optional(),
   isPublished: z.boolean().optional(),
+  isEnrollmentOpen: z.boolean().optional(),
 });
 
 type TestSeriesFormInput = z.infer<typeof testSeriesFormSchema>;
@@ -104,6 +105,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
       streamId: [],
       isActive: false,
       isPublished: false,
+      isEnrollmentOpen: false,
     },
   });
 
@@ -121,6 +123,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
         streamId: linkedStreamIds || [],
         isActive: testSeries.isActive,
         isPublished: testSeries.isPublished,
+        isEnrollmentOpen: testSeries.isEnrollmentOpen ?? false,
       });
     }
   }, [testSeries, linkedStreamIds, open, form]);
@@ -150,6 +153,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
       streamId: data.streamId,
       isActive: data.isActive,
       isPublished: data.isPublished,
+      isEnrollmentOpen: data.isEnrollmentOpen,
     };
 
     updateMutation.mutate(
@@ -358,7 +362,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
             <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/80">Status Settings</h4>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* isActive Checkbox */}
             <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
               <div className="space-y-0.5 select-none">
@@ -381,6 +385,19 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
               <input
                 type="checkbox"
                 {...form.register("isPublished")}
+                className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+
+            {/* isEnrollmentOpen Checkbox */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/40">
+              <div className="space-y-0.5 select-none">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Enrollment Open</label>
+                <p className="text-[10px] text-muted-foreground">Allow new signups.</p>
+              </div>
+              <input
+                type="checkbox"
+                {...form.register("isEnrollmentOpen")}
                 className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
               />
             </div>
