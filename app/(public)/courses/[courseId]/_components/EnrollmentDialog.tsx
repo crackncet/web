@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
+  SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import {
   usePublicExamDetailQuery,
@@ -677,6 +681,8 @@ export function EnrollmentDialog({ isOpen, onClose, course }: EnrollmentDialogPr
           onPointerDownOutside={(e) => { if (isSubmitting) e.preventDefault(); }}
           onEscapeKeyDown={(e) => { if (isSubmitting) e.preventDefault(); }}
         >
+          <SheetTitle className="sr-only">Enroll in {course.title}</SheetTitle>
+          <SheetDescription className="sr-only">Select subjects and confirm details to enroll.</SheetDescription>
           {wizardContent}
         </SheetContent>
       </Sheet>
@@ -690,6 +696,8 @@ export function EnrollmentDialog({ isOpen, onClose, course }: EnrollmentDialogPr
         onPointerDownOutside={(e) => { if (isSubmitting) e.preventDefault(); }}
         onEscapeKeyDown={(e) => { if (isSubmitting) e.preventDefault(); }}
       >
+        <DialogTitle className="sr-only">Enroll in {course.title}</DialogTitle>
+        <DialogDescription className="sr-only">Select subjects and confirm details to enroll.</DialogDescription>
         {wizardContent}
       </DialogContent>
     </Dialog>
