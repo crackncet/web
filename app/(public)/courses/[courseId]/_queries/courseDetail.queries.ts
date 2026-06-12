@@ -1,4 +1,4 @@
-import { getPublicCourseDetail, getPublicCourseMentors, getPublicCourseOutline, getPublicTestSeriesOutline } from "../_api/courseDetail.api";
+import { getPublicCourseDetail, getPublicCourseMentors, getPublicCourseOutline, getPublicTestSeriesOutline, getPublicExamById } from "../_api/courseDetail.api";
 import { useQuery } from "@tanstack/react-query";
 export function usePublicCourseDetailQuery(courseId: string) {
   return useQuery({
@@ -33,5 +33,14 @@ export function usePublicTestSeriesOutlineQuery(testSeriesId: string | null) {
     queryFn: () => getPublicTestSeriesOutline(testSeriesId!),
     enabled: !!testSeriesId,
     staleTime: 1000 * 60 * 15, // 15 minutes cache
+  });
+}
+
+export function usePublicExamDetailQuery(examId: string | undefined) {
+  return useQuery({
+    queryKey: ["publicExamDetail", examId],
+    queryFn: () => getPublicExamById(examId!),
+    enabled: !!examId,
+    staleTime: 1000 * 60 * 35, // 35 minutes cache
   });
 }

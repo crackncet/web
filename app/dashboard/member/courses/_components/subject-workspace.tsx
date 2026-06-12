@@ -358,7 +358,7 @@ export default function SubjectWorkspace({
 
       {/* Create Chapter Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-sm rounded-xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
+        <DialogContent className="sm:max-w-md rounded-xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
           <form onSubmit={handleCreateChapter}>
             <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-850">
               <DialogTitle className="text-sm font-bold text-slate-800 dark:text-slate-200">

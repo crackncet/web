@@ -103,12 +103,12 @@ export function useStreamSubjectsQuery(streamId: string, enabled = true) {
   });
 }
 
-export function useTeachingStaffListQuery(streamId?: string, enabled = true) {
+export function useTeachingStaffListQuery(streamId?: string, search?: string, enabled = true) {
   return useQuery({
-    queryKey: MEMBER_COURSE_QUERY_KEYS.teachingStaff(streamId),
-    queryFn: () => getTeachingStaffList({ streamId }),
+    queryKey: [...MEMBER_COURSE_QUERY_KEYS.teachingStaff(streamId), search],
+    queryFn: () => getTeachingStaffList({ streamId, search }),
     enabled: enabled,
-    staleTime: 30000,
+    staleTime: 5000,
   });
 }
 

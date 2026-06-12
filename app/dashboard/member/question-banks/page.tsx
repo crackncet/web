@@ -248,7 +248,7 @@ export default function QuestionBanksPage() {
 
       {/* Creation Modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-850 dark:text-slate-100">
               Create Question Bank

@@ -38,9 +38,18 @@ export function AssignTeacherDialog() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   const [collegeName, setCollegeName] = useState<string>("");
   const [role, setRole] = useState<"TEACHER" | "TA">("TEACHER");
+  const [candidateSearch, setCandidateSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(candidateSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [candidateSearch]);
 
   // Queries
-  const { data: candidates, isLoading: isCandidatesLoading } = useCandidatesQuery();
+  const { data: candidates, isLoading: isCandidatesLoading } = useCandidatesQuery(debouncedSearch);
   const { data: subjects, isLoading: isSubjectsLoading } = useStreamSubjectsQuery(selectedStreamId);
 
   // Mutation
@@ -60,6 +69,8 @@ export function AssignTeacherDialog() {
     setSelectedSubjectId("");
     setCollegeName("");
     setRole("TEACHER");
+    setCandidateSearch("");
+    setDebouncedSearch("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -125,25 +136,40 @@ export function AssignTeacherDialog() {
             {/* Candidate Selector */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Select Candidate</label>
-              <Select value={selectedUserId} onValueChange={setSelectedUserId} disabled={assignMutation.isPending}>
-                <SelectTrigger className="w-full bg-muted/20 hover:bg-muted/30 border-border text-sm text-foreground h-10 px-3 transition-colors duration-200">
-                  <SelectValue placeholder={isCandidatesLoading ? "Loading candidates..." : "Select candidate..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {candidates?.length === 0 ? (
-                    <div className="text-sm text-muted-foreground p-3 text-center">No active candidate profiles found</div>
-                  ) : (
-                    candidates?.map((candidate) => (
-                      <SelectItem key={candidate.id} value={candidate.id} className="text-sm py-2.5 px-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-foreground">{candidate.fullName}</span>
-                          <span className="text-xs text-muted-foreground font-normal">({candidate.email})</span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Type to search candidate by name or email..."
+                  value={candidateSearch}
+                  onChange={(e) => setCandidateSearch(e.target.value)}
+                  disabled={assignMutation.isPending}
+                  className="w-full bg-muted/20 hover:bg-muted/30 border-border text-xs h-9 px-3 transition-colors duration-200"
+                />
+                <Select value={selectedUserId} onValueChange={setSelectedUserId} disabled={assignMutation.isPending}>
+                  <SelectTrigger className="w-full bg-muted/20 hover:bg-muted/30 border-border text-sm text-foreground h-10 px-3 transition-colors duration-200">
+                    <SelectValue placeholder={isCandidatesLoading ? "Loading candidates..." : "Select candidate..."} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isCandidatesLoading ? (
+                      <div className="flex items-center justify-center p-3 text-xs text-muted-foreground gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                        <span>Searching...</span>
+                      </div>
+                    ) : candidates?.length === 0 ? (
+                      <div className="text-sm text-muted-foreground p-3 text-center">No active candidate profiles found</div>
+                    ) : (
+                      candidates?.map((candidate) => (
+                        <SelectItem key={candidate.id} value={candidate.id} className="text-sm py-2.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">{candidate.fullName}</span>
+                            <span className="text-xs text-muted-foreground font-normal">({candidate.email})</span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Stream Selector */}

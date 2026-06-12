@@ -598,7 +598,7 @@ export default function ChapterDetailWorkspace({
 
       {/* Add Topic Dialog */}
       <Dialog open={isAddTopicOpen} onOpenChange={setIsAddTopicOpen}>
-        <DialogContent className="max-w-sm rounded-xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
+        <DialogContent className="sm:max-w-md rounded-xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
           <form onSubmit={handleCreateTopic}>
             <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-850">
               <DialogTitle className="text-sm font-bold text-slate-800 dark:text-slate-200">
@@ -666,7 +666,7 @@ export default function ChapterDetailWorkspace({
 
       {/* Topic Detail Dialog */}
       <Dialog open={!!selectedTopicId} onOpenChange={(open) => { if (!open) setSelectedTopicId(null); }}>
-        <DialogContent className="max-w-2xl rounded-xl p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <DialogContent className="sm:max-w-2xl rounded-xl p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
           {isLoadingTopicDetail ? (
             <div className="flex flex-col items-center justify-center p-16 gap-2">
               <Loader2 className="h-6 w-6 text-primary animate-spin" />

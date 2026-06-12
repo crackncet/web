@@ -14,6 +14,7 @@ import { Overview } from "./_components/Overview";
 import { CourseOutline } from "./_components/CourseOutline";
 import { TestSeriesOutline } from "./_components/TestSeriesOutline";
 import { BriefInfoCard } from "./_components/BriefInfoCard";
+import { EnrollmentDialog } from "./_components/EnrollmentDialog";
 
 export default function PublicCourseDetailPage() {
   const params = useParams();
@@ -21,6 +22,9 @@ export default function PublicCourseDetailPage() {
 
   const { data: course, isLoading: isDetailLoading, error: detailError } = usePublicCourseDetailQuery(courseId);
   const { data: streamMentors, isLoading: isMentorsLoading } = usePublicCourseMentorsQuery(courseId);
+
+  // Enrollment Dialog State
+  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
 
   // Tabs state - "mentors" is default active as requested
   const [activeTab, setActiveTab] = useState< "overview" | "mentors" |"outline" | "testSeries">("overview");
@@ -141,7 +145,7 @@ export default function PublicCourseDetailPage() {
               <Mentors streamMentors={streamMentors} isLoading={isMentorsLoading} />
             )}
             {activeTab === "overview" && (
-              <Overview />
+              <Overview onEnrollClick={() => setIsEnrollmentOpen(true)} />
             )}
             {activeTab === "outline" && (
               <CourseOutline courseId={course.id} />
@@ -164,9 +168,17 @@ export default function PublicCourseDetailPage() {
           banner={course.banner}
           title={course.title}
           testSeriesId={course.testSeriesId}
+          onEnrollClick={() => setIsEnrollmentOpen(true)}
         />
 
       </div>
+
+      {/* Course subject configuration and enrollment wizard */}
+      <EnrollmentDialog
+        isOpen={isEnrollmentOpen}
+        onClose={() => setIsEnrollmentOpen(false)}
+        course={course}
+      />
 
     </div>
   );

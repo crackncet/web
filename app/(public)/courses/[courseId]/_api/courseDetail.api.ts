@@ -1,6 +1,16 @@
 import { apiClient, ApiSuccessResponse } from "@/lib/api-client";
+
+export interface PublicCourseSubject {
+  id: string;
+  name: string;
+  type: "DOMAIN" | "NON_DOMAIN" | "LANGUAGE";
+  streamId: string;
+  streamName: string;
+}
+
 export interface PublicCourseDetail {
   id: string;
+  examId: string;
   title: string;
   description: string | null;
   banner: string | null;
@@ -20,6 +30,7 @@ export interface PublicCourseDetail {
   topicNotesCount: number;
   chapterNotesCount: number;
   chapterQuestionBankCount: number;
+  subjects: PublicCourseSubject[];
 }
 
 export interface PublicMentor {
@@ -95,6 +106,20 @@ export interface PublicTestSeriesOutline {
 export async function getPublicTestSeriesOutline(testSeriesId: string): Promise<PublicTestSeriesOutline> {
   const response = await apiClient.get<ApiSuccessResponse<PublicTestSeriesOutline>>(
     `/test-series/public/${testSeriesId}/outline`
+  );
+  return response.data.data;
+}
+
+export interface PublicExamDetail {
+  id: string;
+  name: string;
+  enrollmentRules: any;
+  currentRulesVersion: number;
+}
+
+export async function getPublicExamById(examId: string): Promise<PublicExamDetail> {
+  const response = await apiClient.get<ApiSuccessResponse<PublicExamDetail>>(
+    `/metadata/public/exams/${examId}`
   );
   return response.data.data;
 }

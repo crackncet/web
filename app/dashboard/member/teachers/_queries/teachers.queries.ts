@@ -23,11 +23,11 @@ export function useMemberTeachingStaffQuery(filters: GetTeachingStaffFilters) {
   });
 }
 
-export function useCandidatesQuery() {
+export function useCandidatesQuery(search?: string) {
   return useQuery({
-    queryKey: TEACHERS_QUERY_KEYS.candidates(),
-    queryFn: getCandidates,
-    staleTime: 30000,
+    queryKey: [...TEACHERS_QUERY_KEYS.candidates(), search],
+    queryFn: () => getCandidates(search),
+    staleTime: 5000,
   });
 }
 

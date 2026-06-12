@@ -4,7 +4,11 @@ import { usePublicCourseDetailQuery } from "../_queries/courseDetail.queries";
 import { BookOpen, Check, Play, Clock, Trophy, FileText, FileQuestion, Users, Sparkles, AlertCircle, ArrowUpRight, Video, Clipboard, ListTodo, CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function Overview() {
+interface OverviewProps {
+  onEnrollClick?: () => void;
+}
+
+export function Overview({ onEnrollClick }: OverviewProps) {
   const params = useParams();
   const courseId = params.courseId as string;
   const { data: course, isLoading, error } = usePublicCourseDetailQuery(courseId);
@@ -310,8 +314,11 @@ export function Overview() {
           </div>
         </div>
 
-        <button className="w-full sm:w-auto h-9 px-4.5 bg-violet-600 hover:bg-violet-750 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all">
-          Let's get started
+        <button 
+          onClick={onEnrollClick}
+          className="w-full sm:w-auto h-9 px-4.5 bg-violet-600 hover:bg-violet-750 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+        >
+          Enroll Now
           <ArrowUpRight className="h-3.5 w-3.5" />
         </button>
       </div>

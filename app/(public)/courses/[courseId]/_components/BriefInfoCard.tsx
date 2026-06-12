@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import { Tag, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface BriefInfoCardProps {
   coursePrice: string;
@@ -8,9 +8,10 @@ interface BriefInfoCardProps {
   banner: string | null;
   title: string;
   testSeriesId: string | null;
+  onEnrollClick: () => void;
 }
 
-export function BriefInfoCard({ coursePrice, testSeriesPrice, banner, title, testSeriesId }: BriefInfoCardProps) {
+export function BriefInfoCard({ coursePrice, testSeriesPrice, banner, title, testSeriesId, onEnrollClick }: BriefInfoCardProps) {
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -144,6 +145,7 @@ export function BriefInfoCard({ coursePrice, testSeriesPrice, banner, title, tes
       {/* CTA action button */}
       <div className="pt-2">
         <button 
+          onClick={onEnrollClick}
           className="w-full h-11 bg-violet-600 hover:bg-violet-755 text-white font-bold uppercase tracking-wider text-xs rounded-xl transition-all shadow-sm hover:shadow cursor-pointer flex items-center justify-center gap-1.5"
         >
           <span>Enroll Now</span>

@@ -165,9 +165,14 @@ export async function getStreamSubjects(streamId: string) {
   return response.data;
 }
 
-export async function getTeachingStaffList(filters: { streamId?: string }) {
+export async function getTeachingStaffList(filters: { streamId?: string; search?: string }) {
   const params = new URLSearchParams();
   if (filters.streamId) params.append("streamId", filters.streamId);
+  params.append("page", "1");
+  params.append("limit", "100");
+  if (filters.search?.trim()) {
+    params.append("search", filters.search.trim());
+  }
 
   const response = await apiClient.get<ApiSuccessResponse<TeachingStaffListItem[]>>(
     `/staffs/teaching?${params.toString()}`

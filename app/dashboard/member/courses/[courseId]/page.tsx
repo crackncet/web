@@ -10,6 +10,7 @@ import {
   useTeachingStaffListQuery,
 } from "../_queries/courses.queries";
 import { MemberHeader } from "../../layout";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -66,10 +67,20 @@ export default function MemberCourseDetailPage() {
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
   const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [staffSearch, setStaffSearch] = useState<string>("");
+  const [debouncedStaffSearch, setDebouncedStaffSearch] = useState<string>("");
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedStaffSearch(staffSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [staffSearch]);
 
   // Fetch teaching staff for the selected stream
   const { data: staffResponse, isLoading: isStaffLoading } = useTeachingStaffListQuery(
     selectedStreamId || undefined,
+    debouncedStaffSearch,
     !!selectedStreamId
   );
   const teachingStaff = staffResponse?.data || [];
@@ -80,6 +91,8 @@ export default function MemberCourseDetailPage() {
   const handleOpenAssignModal = (streamId: string) => {
     setSelectedStreamId(streamId);
     setSelectedStaffIds([]);
+    setStaffSearch("");
+    setDebouncedStaffSearch("");
     setIsModalOpen(true);
   };
 
@@ -430,6 +443,15 @@ export default function MemberCourseDetailPage() {
               Select Stream Faculty
             </span>
 
+            <Input
+              type="text"
+              placeholder="Search faculty by name, email, or subject..."
+              value={staffSearch}
+              onChange={(e) => setStaffSearch(e.target.value)}
+              disabled={assignMutation.isPending}
+              className="w-full bg-muted/20 hover:bg-muted/30 border-border text-xs h-9 px-3 transition-colors duration-200"
+            />
+
             {isStaffLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, idx) => (
@@ -439,11 +461,13 @@ export default function MemberCourseDetailPage() {
             ) : teachingStaff.length === 0 ? (
               <div className="py-6 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/20 dark:bg-slate-950/10">
                 <p className="text-xs text-muted-foreground font-medium">
-                  No teaching staff registered in this stream yet.
+                  {debouncedStaffSearch.trim() ? "No matching teaching staff found." : "No teaching staff registered in this stream yet."}
                 </p>
-                <p className="text-[10px] text-muted-foreground/50 mt-1 max-w-xs mx-auto">
-                  Add team members as stream faculty globally first in the "Manage Teaching Staff" dashboard.
-                </p>
+                {!debouncedStaffSearch.trim() && (
+                  <p className="text-[10px] text-muted-foreground/50 mt-1 max-w-xs mx-auto">
+                    Add team members as stream faculty globally first in the "Manage Teaching Staff" dashboard.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-1">

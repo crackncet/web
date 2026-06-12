@@ -58,8 +58,17 @@ export async function getTeachingStaff(filters: GetTeachingStaffFilters) {
   };
 }
 
-export async function getCandidates() {
-  const response = await apiClient.get<ApiSuccessResponse<Candidate[]>>("/staffs/teaching/candidates");
+export async function getCandidates(search?: string) {
+  const params: Record<string, any> = {
+    page: 1,
+    limit: 100,
+  };
+  if (search?.trim()) {
+    params.search = search.trim();
+  }
+  const response = await apiClient.get<ApiSuccessResponse<Candidate[]>>("/staffs/teaching/candidates", {
+    params,
+  });
   return response.data.data;
 }
 
