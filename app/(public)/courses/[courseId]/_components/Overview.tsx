@@ -3,6 +3,9 @@ import { useParams } from "next/navigation";
 import { usePublicCourseDetailQuery } from "../_queries/courseDetail.queries";
 import { BookOpen, Check, Play, Clock, Trophy, FileText, FileQuestion, Users, Sparkles, AlertCircle, ArrowUpRight, Video, Clipboard, ListTodo, CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VideoPlayer } from "@/components/video/VideoPlayer";
+import Image from "next/image";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface OverviewProps {
   onEnrollClick?: () => void;
@@ -12,7 +15,7 @@ export function Overview({ onEnrollClick }: OverviewProps) {
   const params = useParams();
   const courseId = params.courseId as string;
   const { data: course, isLoading, error } = usePublicCourseDetailQuery(courseId);
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [openVideoUrl, setOpenVideoUrl] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -42,7 +45,6 @@ export function Overview({ onEnrollClick }: OverviewProps) {
 
   const totalHours = course.videoDurationMinutes ? Math.ceil(course.videoDurationMinutes / 60) : 0;
   const videos = course.demoVideos || [];
-  const activeVideo = activeVideoUrl || (videos.length > 0 ? videos[0] : null);
 
   const benefits = [
     "Complete Syllabus coverage from basic to advanced levels",
@@ -82,7 +84,7 @@ export function Overview({ onEnrollClick }: OverviewProps) {
       </div>
 
       {/* 2. Demo Videos Section (if any) */}
-      {videos.length > 0 && activeVideo && (
+      {videos.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-900/60">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-450 dark:text-slate-550 block">
@@ -93,51 +95,54 @@ export function Overview({ onEnrollClick }: OverviewProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Video Player */}
-            <div className="lg:col-span-2 aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200 dark:border-slate-800 relative group">
-              <video
-                key={activeVideo}
-                src={activeVideo}
-                controls
-                className="w-full h-full object-cover"
-                poster={course.banner || undefined}
-              />
-            </div>
-
-            {/* Playlist Sidebar */}
-            <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1">
-              {videos.map((vidUrl, index) => {
-                const isActive = activeVideo === vidUrl;
-                const fileName = vidUrl.split("/").pop() || `Lecture Demo ${index + 1}`;
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setActiveVideoUrl(vidUrl)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left cursor-pointer ${
-                      isActive
-                        ? "bg-violet-50/50 dark:bg-violet-950/20 border-violet-200 dark:border-violet-900/60"
-                        : "bg-transparent border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-900/30"
-                    }`}
-                  >
-                    <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${
-                      isActive ? "bg-violet-500 text-white" : "bg-muted text-muted-foreground"
-                    }`}>
-                      <Play className="h-3 w-3 fill-current" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {videos.map((vidUrl, index) => {
+              return (
+                <button
+                  key={index}
+                  onClick={() => setOpenVideoUrl(vidUrl)}
+                  className="relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 group hover:scale-[1.02] hover:shadow-md transition-all duration-300 cursor-pointer text-left w-full"
+                >
+                  {course.banner ? (
+                    <Image
+                      src={course.banner}
+                      alt=""
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-tr from-indigo-900/40 to-purple-900/40" />
+                  )}
+                  {/* Play Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/45 transition-colors">
+                    <div className="h-9 w-9 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play className="h-4 w-4 fill-current ml-0.5" />
                     </div>
-                    <div className="min-w-0">
-                      <p className={`text-xs font-bold truncate ${isActive ? "text-violet-750 dark:text-violet-400" : "text-slate-700 dark:text-slate-300"}`}>
-                        Demo Class #{index + 1}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground truncate mt-0.5 max-w-[200px]">
-                        {fileName}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
+
+          <Dialog open={!!openVideoUrl} onOpenChange={(open) => { if (!open) setOpenVideoUrl(null); }}>
+            <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-black border-none rounded-2xl max-w-[calc(100%-2rem)]">
+              {openVideoUrl && (
+                <div className="aspect-video w-full">
+                  <VideoPlayer
+                    key={openVideoUrl}
+                    assetId={(() => {
+                      const match = openVideoUrl.match(/\/shared\/([a-f0-9-]+)/i);
+                      return match ? match[1] : "";
+                    })()}
+                    streamUrl={openVideoUrl}
+                    poster={course.banner || undefined}
+                    showWatermark={false}
+                    className="w-full h-full"
+                  />
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 

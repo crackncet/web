@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StudentHeader } from "../../../../../../layout";
 import { useStudentCourseDetailQuery } from "../../../../_queries/course-detail.queries";
 import { useSharedAssetDetailQuery } from "@/app/dashboard/member/media/_queries/media.queries";
+import { VideoPlayer } from "@/components/video/VideoPlayer";
 
 export default function StudentTopicDetailPage() {
   const params = useParams();
@@ -29,8 +30,6 @@ export default function StudentTopicDetailPage() {
   const courseSubjectId = params.courseSubjectId as string;
   const topicId = params.topicId as string;
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [hlsLoaded, setHlsLoaded] = useState(false);
   const [activeAssetId, setActiveAssetId] = useState<string | null>(null);
   const [activeAssetType, setActiveAssetType] = useState<"VIDEO" | "NOTE" | null>(null);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -146,67 +145,9 @@ export default function StudentTopicDetailPage() {
         : `${baseApiUrl}${asset.url}`
       : "";
 
-  // Dynamically load HLS.js for VOD video streaming
-  useEffect(() => {
-    if (activeAssetType !== "VIDEO" || !activeAssetId) return;
-
-    const scriptId = "hls-js-script";
-    if (document.getElementById(scriptId)) {
-      setHlsLoaded(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js";
-    script.onload = () => setHlsLoaded(true);
-    document.head.appendChild(script);
-  }, [activeAssetType, activeAssetId]);
-
-  // Bind HLS stream to standard HTML5 video tag
-  useEffect(() => {
-    if (
-      activeAssetType !== "VIDEO" ||
-      !videoRef.current ||
-      !streamUrl ||
-      (streamUrl.includes(".m3u8") && !hlsLoaded)
-    )
-      return;
-
-    const video = videoRef.current;
-    const isHlsUrl = streamUrl.includes(".m3u8");
-
-    if (isHlsUrl && (window as any).Hls) {
-      const HlsClass = (window as any).Hls;
-      if (HlsClass.isSupported()) {
-        const hls = new HlsClass({
-          maxMaxBufferLength: 10,
-          enableWorker: true,
-        });
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-        return () => {
-          hls.destroy();
-        };
-      }
-    }
-
-    video.src = streamUrl;
-  }, [activeAssetType, streamUrl, hlsLoaded]);
-
   const handleAssetSelect = (assetId: string, type: "VIDEO" | "NOTE") => {
     setActiveAssetId(assetId);
     setActiveAssetType(type);
-  };
-
-  const handleFullscreenVideo = () => {
-    if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
-      } else if ((videoRef.current as any).webkitRequestFullscreen) {
-        (videoRef.current as any).webkitRequestFullscreen();
-      }
-    }
   };
 
   if (isSyllabusLoading) {
@@ -306,22 +247,12 @@ export default function StudentTopicDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="relative w-full h-full group">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-contain"
-                  controls
-                  playsInline
-                  autoPlay
-                />
-                <Button
-                  size="icon"
-                  onClick={handleFullscreenVideo}
-                  className="absolute bottom-4 right-14 z-10 h-8 w-8 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-white flex sm:hidden items-center justify-center"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <VideoPlayer
+                assetId={activeAssetId}
+                streamUrl={streamUrl}
+                showWatermark={true}
+                className="w-full h-full"
+              />
             )}
           </div>
 

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import { Play } from "lucide-react";
 
 interface BriefInfoCardProps {
   coursePrice: string;
@@ -58,15 +57,6 @@ export function BriefInfoCard({ coursePrice, testSeriesPrice, banner, title, tes
         ) : (
           <div className="w-full h-full bg-gradient-to-tr from-indigo-900/60 to-purple-900/60" />
         )}
-        {/* Play Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-12 w-12 rounded-full bg-white dark:bg-slate-900 text-slate-955 dark:text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform cursor-pointer">
-            <Play className="h-5 w-5 fill-current ml-0.5" />
-          </div>
-        </div>
-        <div className="absolute bottom-2.5 left-2.5 z-10 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] font-bold text-white tracking-wider">
-          PREVIEW COURSE
-        </div>
       </div>
 
       {/* Course Purchase Header */}

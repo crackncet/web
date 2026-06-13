@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
+import { VideoPlayer } from "@/components/video/VideoPlayer";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -43,9 +44,6 @@ export default function SharedMediaViewPage() {
   const router = useRouter();
   const assetId = params.assetId as string;
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [hlsLoaded, setHlsLoaded] = useState(false);
-
   // Fetch shared media details
   const { data: response, isLoading, error } = useSharedAssetDetailQuery(assetId);
   const asset = response?.data;
@@ -57,55 +55,6 @@ export default function SharedMediaViewPage() {
     : "";
 
   const downloadUrl = streamUrl ? `${streamUrl}?download=true` : "";
-
-  // Dynamically load HLS.js from CDN if it's a VOD video and not native supported
-  useEffect(() => {
-    if (!asset || asset.type !== "VOD") return;
-
-    const loadHls = () => {
-      if ((window as any).Hls) {
-        setHlsLoaded(true);
-        return;
-      }
-      const script = document.createElement("script");
-      script.id = "hls-js";
-      script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js";
-      script.onload = () => {
-        setHlsLoaded(true);
-      };
-      document.head.appendChild(script);
-    };
-
-    loadHls();
-  }, [asset]);
-
-  // Bind HLS stream to video tag
-  useEffect(() => {
-    if (!asset || asset.type !== "VOD" || !videoRef.current || !streamUrl) return;
-
-    const video = videoRef.current;
-
-    // Check if the source is HLS (.m3u8)
-    const isHlsUrl = streamUrl.includes(".m3u8");
-
-    if (isHlsUrl && hlsLoaded && (window as any).Hls) {
-      const HlsClass = (window as any).Hls;
-      if (HlsClass.isSupported()) {
-        const hls = new HlsClass({
-          maxMaxBufferLength: 10,
-          enableWorker: true,
-        });
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-        return () => {
-          hls.destroy();
-        };
-      }
-    }
-
-    // Fallback/direct URL load (standard formats or Safari native HLS)
-    video.src = streamUrl;
-  }, [asset, hlsLoaded, streamUrl]);
 
   if (isLoading) {
     return (
@@ -190,16 +139,12 @@ export default function SharedMediaViewPage() {
                 </div>
               </div>
             ) : (
-              // Video Lecture Player (Custom Glassmorphic Wrapper)
-              <div className="relative w-full h-full group">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-contain"
-                  controls
-                  playsInline
-                  autoPlay
-                />
-              </div>
+              <VideoPlayer
+                assetId={assetId}
+                streamUrl={streamUrl}
+                showWatermark={true}
+                className="w-full h-full"
+              />
             )}
           </div>
         </div>
