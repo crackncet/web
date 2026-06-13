@@ -65,7 +65,7 @@ export default function PublicCourseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/20 dark:bg-slate-950/5 pt-16">
+    <div className="min-h-screen bg-slate-50/20 dark:bg-slate-950/5">
       
       {/* 1. Full-Width Course Hero */}
       <CourseHero

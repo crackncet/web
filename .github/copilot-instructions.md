@@ -182,3 +182,17 @@
 - Use streaming-friendly players and progressive loading for video content.
 - Isolate heavy dashboards (live CBT, analytics, proctoring) with Suspense boundaries.
 - Keep real-time UI updates minimal and throttle expensive renders.
+
+## Student Dashboard Design (MANDATORY)
+
+When working on any route under `app/dashboard/student/`, you MUST read and strictly adhere to:
+`web/.github/student-dashboard-design.md`
+
+This is the authoritative design specification. Key constraints:
+
+- **Mobile-first ONLY**: Default Tailwind classes = phone viewport. Desktop is additive via `md:`, `lg:`.
+- **Bottom tab bar on `<md`**: No sidebar, no hamburger. Sidebar appears at `md+` only.
+- **44px minimum touch targets**: All buttons, links, list items, tabs, icons. No exceptions.
+- **Forced landscape for media/tests**: Video, PDF, and CBT screens must call `screen.orientation.lock('landscape')` on fullscreen entry, with a "please rotate" fallback overlay.
+- **Build order**: Complete mobile UI first. Add desktop breakpoints only AFTER mobile is reviewed and functional.
+- **Immersive mode**: Video, PDF, and CBT screens hide the bottom tab bar and top header. Use `isImmersive` flag from `StudentLayoutContext`.

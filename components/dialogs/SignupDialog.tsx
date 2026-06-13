@@ -27,7 +27,11 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function SignupDialog() {
+export default function SignupDialog({
+  trigger,
+}: {
+  trigger?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState("");
@@ -102,7 +106,7 @@ export default function SignupDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">Register</Button>
+        {trigger || <Button variant="outline">Register</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

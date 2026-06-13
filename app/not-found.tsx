@@ -1,12 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
     <>
-      <Navbar />
       <main className="relative flex flex-col items-center justify-center min-h-screen w-full overflow-hidden bg-background">
         
         {/* Background Clouds Image */}
