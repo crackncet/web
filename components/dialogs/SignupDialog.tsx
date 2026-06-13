@@ -28,11 +28,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function SignupDialog({
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
   trigger,
 }: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? controlledOnOpenChange : setUncontrolledOpen;
   const [otpSent, setOtpSent] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -80,7 +87,7 @@ export default function SignupDialog({
     signUp(cleanedData, {
       onSuccess: () => {
         toast.success("Account created successfully!");
-        setOpen(false);
+        setOpen?.(false);
         resetState();
       },
       onError: (error) => {
@@ -97,7 +104,7 @@ export default function SignupDialog({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
+    setOpen?.(newOpen);
     if (!newOpen) {
       setTimeout(resetState, 200);
     }
@@ -105,9 +112,11 @@ export default function SignupDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || <Button variant="outline">Register</Button>}
-      </DialogTrigger>
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || <Button variant="outline">Register</Button>}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create an Account</DialogTitle>

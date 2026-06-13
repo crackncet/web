@@ -163,6 +163,8 @@ function MobileNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -227,7 +229,7 @@ function MobileNav() {
           {/* User Profile Card if logged in */}
           {user && (
             <div className="mt-4 p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-650 flex items-center justify-center text-white text-sm font-black shadow-inner">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-655 flex items-center justify-center text-white text-sm font-black shadow-inner">
                 {getInitials(user.fullName)}
               </div>
               <div className="flex flex-col">
@@ -255,7 +257,7 @@ function MobileNav() {
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                   pathname.startsWith("/dashboard")
                     ? "bg-violet-50 text-violet-600 dark:bg-violet-955/35 dark:text-violet-400"
-                    : "text-slate-605 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
+                    : "text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -274,7 +276,7 @@ function MobileNav() {
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     isActive
                       ? "bg-violet-50 text-violet-600 dark:bg-violet-955/35 dark:text-violet-400"
-                      : "text-slate-605 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
+                      : "text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -297,23 +299,33 @@ function MobileNav() {
               </button>
             ) : (
               <div className="flex flex-col gap-2.5">
-                <LoginDailog trigger={
-                  <button onClick={() => setOpen(false)} className="w-full h-10 flex items-center justify-center font-bold text-xs uppercase tracking-wider text-slate-750 dark:text-slate-300 hover:text-violet-650 dark:hover:text-violet-400 cursor-pointer">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </button>
-                } />
-                <SignupDialog trigger={
-                  <button onClick={() => setOpen(false)} className="w-full h-11 flex items-center justify-center font-bold text-xs uppercase tracking-wider bg-violet-600 hover:bg-violet-750 text-white rounded-xl cursor-pointer transition-all shadow-xs">
-                    Sign Up
-                  </button>
-                } />
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setTimeout(() => setShowLogin(true), 150);
+                  }}
+                  className="w-full h-10 flex items-center justify-center font-bold text-xs uppercase tracking-wider text-slate-750 dark:text-slate-300 hover:text-violet-650 dark:hover:text-violet-400 cursor-pointer"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setTimeout(() => setShowSignup(true), 150);
+                  }}
+                  className="w-full h-11 flex items-center justify-center font-bold text-xs uppercase tracking-wider bg-violet-600 hover:bg-violet-750 text-white rounded-xl cursor-pointer transition-all shadow-xs"
+                >
+                  Sign Up
+                </button>
               </div>
             )}
           </div>
 
         </SheetContent>
       </Sheet>
+      <LoginDailog open={showLogin} onOpenChange={setShowLogin} trigger={null} />
+      <SignupDialog open={showSignup} onOpenChange={setShowSignup} trigger={null} />
     </div>
   );
 }
