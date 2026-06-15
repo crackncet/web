@@ -305,13 +305,18 @@ export default function StudentTopicDetailPage() {
 
               {/* DPP Practice Section */}
               {hasDpp && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 text-xs font-semibold min-h-[44px] px-3.5 border-border hover:bg-emerald-500/5 hover:text-emerald-600 hover:border-emerald-500/20"
+                <Link
+                  href={`/dashboard/student/my-courses/${courseId}/subjects/${courseSubjectId}/topics/${topicId}/practice/${topic.dppBankId}/attempt`}
+                  className="w-full"
                 >
-                  <HelpCircle className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span>Practice DPP Questions</span>
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3 text-xs font-semibold min-h-[44px] px-3.5 border-border hover:bg-emerald-500/5 hover:text-emerald-600 hover:border-emerald-500/20 cursor-pointer"
+                  >
+                    <HelpCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                    <span>Practice DPP Questions</span>
+                  </Button>
+                </Link>
               )}
 
               {/* Live Lecture Section */}
