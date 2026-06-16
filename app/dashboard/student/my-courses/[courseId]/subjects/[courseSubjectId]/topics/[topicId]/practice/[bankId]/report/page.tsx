@@ -1,29 +1,28 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Loader2,
   AlertCircle,
-  TrendingUp,
-  CheckCircle,
-  XCircle,
-  HelpCircle,
-  Clock,
   RotateCcw,
   BookOpen,
-  ChevronRight,
-  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CbtLayout } from "@/components/cbt/_components/cbt-layout";
 import { QuestionCard } from "@/components/cbt/_components/question-card";
-import { usePracticeReportQuery } from "../../_queries/practice.queries";
-import { getOrStartPracticeAttempt } from "../../_api/practice.api";
+import { usePracticeReportQuery, PRACTICE_QUERY_KEYS } from "../../_queries/practice.queries";
+import { getOrStartPracticeAttempt} from "../../_api/practice.api";
 import { useQueryClient } from "@tanstack/react-query";
-import { PRACTICE_QUERY_KEYS } from "../../_queries/practice.queries";
 import { useStudentCourseDetailQuery } from "../../../../../../../_queries/course-detail.queries";
+
+// Modular report components
+import { MetricsGrid } from "./_components/metrics-grid";
+import { DonutChart } from "./_components/donut-chart";
+import { ScoreTrendChart } from "./_components/score-trend-chart";
+import { SectionPerformance } from "./_components/section-performance";
 
 function PracticeReportContent() {
   const params = useParams();
@@ -49,10 +48,12 @@ function PracticeReportContent() {
     attemptId,
     attemptNumber,
   });
+  
   const payload = response?.data;
   const attempt = payload?.attempt;
-  const questions = payload?.questions || [];
-  const sections = payload?.sections || [];
+  const allAttempts = payload?.allAttempts || [];
+  const questions = useMemo(() => payload?.questions || [], [payload?.questions]);
+  const sections = useMemo(() => payload?.sections || [], [payload?.sections]);
 
   // Fetch syllabus details for subjectName lookup
   const { data: syllabusResponse } = useStudentCourseDetailQuery(courseId);
@@ -74,12 +75,76 @@ function PracticeReportContent() {
       });
       // Redirect to active attempt page
       router.push(
-        `/dashboard/student/my-courses/${courseId}/subjects/${courseSubjectId}/topics/${topicId}/practice/${bankId}/attempt`
+        `/dashboard/student/my-courses/${courseId}/subjects/${courseSubjectId}/topics/[topicId]/practice/${bankId}/attempt`
       );
     } catch (err) {
       console.error("Failed to start fresh attempt", err);
       setStartingFresh(false);
     }
+  };
+
+  // Helper for parsing evaluation status from attempt responses
+  const evaluatedResponses = useMemo(() => attempt?.responses?.questions || [], [attempt]);
+
+  // Response breakdown calculation for donut chart
+  const responseChartData = useMemo(() => {
+    if (!attempt) return [];
+    const total = attempt.totalQuestions || 1;
+    const unattempted = attempt.totalQuestions - attempt.totalAttempted;
+
+    return [
+      {
+        label: "Correct",
+        value: attempt.totalCorrect,
+        color: "#10b981", // emerald-500
+        percentage: (attempt.totalCorrect / total) * 100,
+      },
+      {
+        label: "Partially Correct",
+        value: attempt.totalPartialCorrect,
+        color: "#3b82f6", // blue-500
+        percentage: (attempt.totalPartialCorrect / total) * 100,
+      },
+      {
+        label: "Incorrect",
+        value: attempt.totalIncorrect,
+        color: "#f43f5e", // rose-500
+        percentage: (attempt.totalIncorrect / total) * 100,
+      },
+      {
+        label: "Unattempted",
+        value: unattempted,
+        color: "#64748b", // slate-500
+        percentage: (unattempted / total) * 100,
+      },
+    ];
+  }, [attempt]);
+
+  // Group questions by section for index navigator mapping
+  const questionsBySection = useMemo(() => {
+    return sections.reduce<Record<string, typeof questions>>((acc, sec) => {
+      acc[sec.id] = questions.filter((q) => q.sectionId === sec.id);
+      return acc;
+    }, {});
+  }, [sections, questions]);
+
+  const unsortedQuestions = useMemo(() => {
+    return questions.filter((q) => !q.sectionId || !questionsBySection[q.sectionId]);
+  }, [questions, questionsBySection]);
+
+  const getQuestionResultIcon = (questionId: string) => {
+    const resp = evaluatedResponses.find((r) => r.questionId === questionId);
+    if (!resp) return "border-border text-muted-foreground";
+    if (resp.isCorrect) return "bg-emerald-500 border-emerald-500 text-white";
+    if (resp.isPartiallyCorrect) return "bg-blue-500 border-blue-500 text-white";
+    if (resp.isCorrect === false) return "bg-rose-500 border-rose-500 text-white";
+    return "border-border text-muted-foreground";
+  };
+
+  const handleSelectAttempt = (id: string) => {
+    router.push(
+      `/dashboard/student/my-courses/${courseId}/subjects/${courseSubjectId}/topics/${topicId}/practice/${bankId}/report?attemptId=${id}`
+    );
   };
 
   if (isLoading || startingFresh) {
@@ -108,34 +173,6 @@ function PracticeReportContent() {
     );
   }
 
-  // Format time spent helper
-  const formatTime = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const remainingSecs = secs % 60;
-    if (mins === 0) return `${remainingSecs}s`;
-    return `${mins}m ${remainingSecs}s`;
-  };
-
-  const evaluatedResponses = attempt.responses?.questions || [];
-
-  // Group questions by section for grid
-  const questionsBySection = sections.reduce<Record<string, typeof questions>>((acc, sec) => {
-    acc[sec.id] = questions.filter((q) => q.sectionId === sec.id);
-    return acc;
-  }, {});
-  const unsortedQuestions = questions.filter(
-    (q) => !q.sectionId || !questionsBySection[q.sectionId]
-  );
-
-  const getQuestionResultIcon = (questionId: string) => {
-    const resp = evaluatedResponses.find((r) => r.questionId === questionId);
-    if (!resp) return "border-border text-muted-foreground";
-    if (resp.isCorrect) return "bg-emerald-500 border-emerald-500 text-white";
-    if (resp.isPartiallyCorrect) return "bg-blue-500 border-blue-500 text-white";
-    if (resp.isCorrect === false) return "bg-rose-500 border-rose-500 text-white";
-    return "border-border text-muted-foreground";
-  };
-
   const activeQuestion = questions[currentIndex];
   const activeResponse = evaluatedResponses.find((r) => r.questionId === activeQuestion?.id);
 
@@ -149,7 +186,7 @@ function PracticeReportContent() {
         sections={sections}
         currentIndex={currentIndex}
         onSelectIndex={setCurrentIndex}
-        evaluatedResponses={evaluatedResponses as any[]}
+        evaluatedResponses={evaluatedResponses as React.ComponentProps<typeof CbtLayout>["evaluatedResponses"]}
         onClose={() => setShowSummary(true)}
       >
         {activeQuestion && (
@@ -159,7 +196,7 @@ function PracticeReportContent() {
             isReportMode={true}
             selectedOptionIds={activeResponse?.selectedOptionIds || []}
             numericAnswer={activeResponse?.numericAnswer || ""}
-            evaluatedResponse={activeResponse as any}
+            evaluatedResponse={activeResponse as React.ComponentProps<typeof QuestionCard>["evaluatedResponse"]}
           />
         )}
       </CbtLayout>
@@ -167,16 +204,37 @@ function PracticeReportContent() {
   }
 
   return (
-    <div className="space-y-6 pb-16 select-none max-w-4xl mx-auto">
+    <div className="space-y-6 pb-16 select-none max-w-7xl mx-auto px-4 md:px-0">
       {/* 1. Header Hero Panel */}
       <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 md:p-8 border border-primary/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded">
-              Attempt #{attempt.attemptNumber}
-            </span>
+        <div className="space-y-2.5">
+          <div className="flex items-center flex-wrap gap-2.5">
+            {allAttempts.length > 1 ? (
+              <div className="relative">
+                <select
+                  value={attempt.id}
+                  onChange={(e) => {
+                    const selected = allAttempts.find((a: { id: string; attemptNumber: number }) => a.id === e.target.value);
+                    if (selected) {
+                      handleSelectAttempt(selected.id);
+                    }
+                  }}
+                  className="bg-primary/10 text-primary border-none rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider focus:outline-none cursor-pointer hover:bg-primary/15 transition-colors"
+                >
+                  {allAttempts.map((a: { id: string; attemptNumber: number }) => (
+                    <option key={a.id} value={a.id} className="bg-popover text-foreground">
+                      Attempt #{a.attemptNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <span className="text-[10px] font-bold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded">
+                Attempt #{attempt.attemptNumber}
+              </span>
+            )}
             <span className="text-xs text-muted-foreground font-semibold">
-              Completed on {new Date(attempt.completedAt!).toLocaleDateString()}
+              Completed on {new Date(attempt.completedAt!).toLocaleString()}
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-black text-foreground">
@@ -211,171 +269,82 @@ function PracticeReportContent() {
       </div>
 
       {/* 2. Diagnostic Score Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Score widget */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="rounded-xl bg-primary/10 p-3 text-primary shrink-0">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wide">
-                Total Score
-              </span>
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-black text-foreground">{parseFloat(attempt.totalScore)}</span>
-                <span className="text-[10px] font-bold text-muted-foreground">/ {parseFloat(attempt.maxPossibleScore)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <MetricsGrid
+        totalScore={attempt.totalScore}
+        maxPossibleScore={attempt.maxPossibleScore}
+        accuracy={attempt.accuracy}
+        totalTimeSeconds={attempt.totalTimeSeconds}
+        totalQuestions={attempt.totalQuestions}
+        totalCorrect={attempt.totalCorrect}
+      />
 
-        {/* Accuracy widget */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="rounded-xl bg-violet-500/10 p-3 text-violet-600 shrink-0">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wide">
-                Accuracy
-              </span>
-              <div className="text-lg font-black text-foreground">
-                {parseFloat(attempt.accuracy).toFixed(0)}%
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Time spent widget */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-600 shrink-0">
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wide">
-                Time Taken
-              </span>
-              <div className="text-lg font-black text-foreground">
-                {formatTime(attempt.totalTimeSeconds)}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Questions answered widget */}
-        <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-600 shrink-0">
-              <CheckCircle className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wide">
-                Correct Qs
-              </span>
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-black text-foreground">{attempt.totalCorrect}</span>
-                <span className="text-[10px] font-bold text-muted-foreground">/ {attempt.totalQuestions}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* 3. Graphical Score Trend (Full Width) */}
+      <div className="w-full">
+        {allAttempts.length > 0 ? (
+          <ScoreTrendChart
+            allAttempts={allAttempts}
+            activeAttemptNumber={attempt.attemptNumber}
+            maxPossibleScore={parseFloat(attempt.maxPossibleScore)}
+            onSelectAttempt={handleSelectAttempt}
+            className="w-full"
+          />
+        ) : (
+          <Card className="rounded-2xl border-border/80 p-6 flex flex-col items-center justify-center text-center w-full">
+            <TrendingUp className="h-8 w-8 text-muted-foreground mb-2" />
+            <span className="text-xs text-muted-foreground font-semibold">
+              Complete more attempts to unlock history trends.
+            </span>
+          </Card>
+        )}
       </div>
 
-      {/* 3. Detailed Stats Breakdown */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Left column: Score analysis chart card */}
-        <Card className="rounded-2xl border-border/80 shadow-sm md:col-span-1">
-          <CardContent className="p-6 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Response Breakdown
-            </h3>
+      {/* 4. Section Performance & Performance Overview Donut Grid */}
+      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
+        {/* Left/Middle: Section Performance progress breakdown */}
+        <div className="lg:col-span-2 flex flex-col justify-stretch">
+          {sections.length > 0 ? (
+            <SectionPerformance
+              sections={sections}
+              questions={questions}
+              responses={evaluatedResponses}
+            />
+          ) : (
+            <Card className="rounded-2xl border-border/80 p-6 flex flex-col items-center justify-center text-center h-full">
+              <span className="text-xs text-muted-foreground font-semibold">
+                No section details available for this question bank.
+              </span>
+            </Card>
+          )}
+        </div>
 
-            <div className="space-y-3 pt-1">
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span>Correct</span>
-                </span>
-                <span className="text-foreground">{attempt.totalCorrect}</span>
-              </div>
+        {/* Right Side: Response Breakdown Donut Chart */}
+        <DonutChart
+          title="Performance Overview"
+          data={responseChartData}
+          totalLabel="Total Questions"
+          totalValue={attempt.totalQuestions}
+          className="h-full"
+        />
+      </div>
 
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-blue-500 shrink-0" />
-                  <span>Partially Correct</span>
-                </span>
-                <span className="text-foreground">{attempt.totalPartialCorrect}</span>
-              </div>
+      {/* 6. Interactive Navigator Board */}
+      <Card className="rounded-2xl border-border/80 shadow-sm md:col-span-2 bg-card">
+        <CardContent className="p-6">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
+            Navigator Board (Tap to view solutions)
+          </h3>
 
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <XCircle className="h-4 w-4 text-rose-500 shrink-0" />
-                  <span>Incorrect</span>
-                </span>
-                <span className="text-foreground">{attempt.totalIncorrect}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>Unattempted</span>
-                </span>
-                <span className="text-foreground">
-                  {attempt.totalQuestions - attempt.totalAttempted}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Right column: Interactive Navigator Board */}
-        <Card className="rounded-2xl border-border/80 shadow-sm md:col-span-2">
-          <CardContent className="p-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
-              Navigator Board (Tap to view solutions)
-            </h3>
-
-            <div className="space-y-6">
-              {sections.map((sec) => {
-                const secQuestions = questionsBySection[sec.id] || [];
-                if (secQuestions.length === 0) return null;
-                return (
-                  <div key={sec.id} className="space-y-2">
-                    <h4 className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wide border-b border-border/60 pb-1">
-                      {sec.title}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {secQuestions.map((q) => {
-                        const overallIndex = questions.findIndex((item) => item.id === q.id);
-                        return (
-                          <button
-                            key={q.id}
-                            onClick={() => {
-                              setCurrentIndex(overallIndex);
-                              setShowSummary(false);
-                            }}
-                            className={`h-9 w-9 border rounded-lg flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer ${getQuestionResultIcon(
-                              q.id
-                            )}`}
-                          >
-                            {overallIndex + 1}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {unsortedQuestions.length > 0 && (
-                <div className="space-y-2">
+          <div className="space-y-6">
+            {sections.map((sec) => {
+              const secQuestions = questionsBySection[sec.id] || [];
+              if (secQuestions.length === 0) return null;
+              return (
+                <div key={sec.id} className="space-y-2">
                   <h4 className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wide border-b border-border/60 pb-1">
-                    Questions
+                    {sec.title}
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {unsortedQuestions.map((q) => {
+                    {secQuestions.map((q) => {
                       const overallIndex = questions.findIndex((item) => item.id === q.id);
                       return (
                         <button
@@ -384,7 +353,7 @@ function PracticeReportContent() {
                             setCurrentIndex(overallIndex);
                             setShowSummary(false);
                           }}
-                          className={`h-9 w-9 border rounded-lg flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer ${getQuestionResultIcon(
+                          className={`h-9 w-9 border rounded-full flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer ${getQuestionResultIcon(
                             q.id
                           )}`}
                         >
@@ -394,31 +363,74 @@ function PracticeReportContent() {
                     })}
                   </div>
                 </div>
-              )}
-            </div>
+              );
+            })}
 
-            {/* Quick legend */}
-            <div className="flex flex-wrap gap-3 pt-5 mt-5 border-t border-border/50 text-[10px] font-medium text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-emerald-500" />
-                <span>Correct</span>
+            {unsortedQuestions.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wide border-b border-border/60 pb-1">
+                  Questions
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {unsortedQuestions.map((q) => {
+                    const overallIndex = questions.findIndex((item) => item.id === q.id);
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => {
+                          setCurrentIndex(overallIndex);
+                          setShowSummary(false);
+                        }}
+                        className={`h-9 w-9 border rounded-full flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer ${getQuestionResultIcon(
+                          q.id
+                        )}`}
+                      >
+                        {overallIndex + 1}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-blue-500" />
-                <span>Partially Correct</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-rose-500" />
-                <span>Wrong</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 border border-border rounded" />
-                <span>Unattempted</span>
-              </div>
+            )}
+          </div>
+
+          {/* Quick legend */}
+          <div className="flex flex-wrap gap-3 pt-5 mt-5 border-t border-border/50 text-[10px] font-medium text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500" />
+              <span>Correct</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-blue-500" />
+              <span>Partially Correct</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-rose-500" />
+              <span>Wrong</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 border border-border rounded-full" />
+              <span>Unattempted</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 7. Bottom Call-to-Action */}
+      <Card className="rounded-3xl border-border bg-gradient-to-r from-violet-500/10 via-primary/5 to-transparent p-6 flex flex-col md:flex-row justify-between items-center gap-5 select-none">
+        <div className="text-center md:text-left space-y-1">
+          <h4 className="text-sm font-black text-foreground">Keep practicing!</h4>
+          <p className="text-xs text-muted-foreground font-semibold">
+            {"Consistent practice is the key to improvement. You're on the right track."}
+          </p>
+        </div>
+        <Button
+          onClick={handleStartFresh}
+          className="min-h-[44px] rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-6 cursor-pointer text-xs uppercase tracking-wider"
+        >
+          Start New Practice
+        </Button>
+      </Card>
 
       <div className="flex justify-center pt-4">
         <Button

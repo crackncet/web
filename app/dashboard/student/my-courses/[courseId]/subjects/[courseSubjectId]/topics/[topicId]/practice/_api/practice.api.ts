@@ -89,6 +89,20 @@ export interface PracticeAttemptPayload {
   questions: PracticeQuestion[];
 }
 
+export interface PracticeReportPayload {
+  attempt: PracticeAttempt;
+  allAttempts: Array<{
+    id: string;
+    attemptNumber: number;
+    totalScore: string;
+    accuracy: string;
+    totalTimeSeconds: number;
+    completedAt: string | null;
+  }>;
+  sections: PracticeSection[];
+  questions: PracticeQuestion[];
+}
+
 export interface SubmitPracticeResponse {
   questionId: string;
   selectedOptionIds: string[];
@@ -133,7 +147,7 @@ export async function getPracticeReport(
   bankId: string,
   params: { attemptId?: string; attemptNumber?: number }
 ) {
-  const response = await apiClient.get<ApiSuccessResponse<PracticeAttemptPayload>>(
+  const response = await apiClient.get<ApiSuccessResponse<PracticeReportPayload>>(
     `/classroom/practice/${bankId}/report`,
     { params }
   );

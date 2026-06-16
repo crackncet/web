@@ -161,14 +161,22 @@ export function CbtLayout({
         {/* Sidebar Toggle Handle for Desktop */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 z-50 h-20 w-4 bg-muted hover:bg-muted/80 border border-y-border border-r-border rounded-r-xl items-center justify-center text-muted-foreground transition-all duration-200"
+          className={cn(
+            "hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 z-50 h-20 w-5 items-center justify-center transition-all duration-200 border cursor-pointer",
+            sidebarOpen 
+              ? "bg-muted hover:bg-muted/80 text-muted-foreground border-y-border border-r-border rounded-r-xl" 
+              : "bg-primary text-primary-foreground hover:bg-primary/95 border-primary rounded-r-xl shadow-lg ring-2 ring-primary/20"
+          )}
           style={{
             transform: sidebarOpen ? `translateX(320px) translateY(-50%)` : `translateX(0px) translateY(-50%)`,
           }}
+          title={sidebarOpen ? "Collapse Navigator" : "Expand Navigator"}
         >
-          <span className="text-[10px] font-bold font-mono">
-            {sidebarOpen ? "«" : "»"}
-          </span>
+          {sidebarOpen ? (
+            <ChevronLeft className="h-4.5 w-4.5" />
+          ) : (
+            <ChevronRight className="h-4.5 w-4.5 animate-pulse" />
+          )}
         </button>
 
         {/* Main Question Workspace */}

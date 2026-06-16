@@ -146,7 +146,7 @@ export function QuestionNavigator({
 
   const renderGrid = (qs: typeof questions) => {
     return (
-      <div className="grid grid-cols-5 gap-2.5">
+      <div className="flex flex-wrap gap-2">
         {qs.map((q) => {
           const overallIndex = questions.findIndex((item) => item.id === q.id);
           const isSelected = overallIndex === currentIndex;
@@ -157,7 +157,7 @@ export function QuestionNavigator({
               key={q.id}
               onClick={() => handleSelectQuestion(q.id)}
               className={cn(
-                "relative aspect-square flex items-center justify-center rounded-xl border text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 min-h-[44px] min-w-[44px]",
+                "relative h-9 w-9 shrink-0 flex items-center justify-center rounded-full border text-xs font-bold transition-all focus:outline-none cursor-pointer hover:scale-105 active:scale-95",
                 status.bgClass,
                 isSelected && "ring-2 ring-primary ring-offset-2 scale-105"
               )}
@@ -181,7 +181,7 @@ export function QuestionNavigator({
 
   return (
     <div className={cn("flex flex-col h-full bg-card text-foreground", className)}>
-      <div className="flex-1 overflow-y-auto space-y-5 pr-1 py-1">
+      <div className="flex-1 overflow-y-auto space-y-5 pl-2.5 pr-1 py-2">
         {/* Sections grouped */}
         {sections.map((sec) => {
           const secQuestions = questionsBySection[sec.id] || [];
@@ -213,51 +213,51 @@ export function QuestionNavigator({
           {isReportMode ? (
             <>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-emerald-500 border border-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-                  <Check className="h-3 w-3" />
+                <span className="w-[18px] h-[18px] rounded-md bg-emerald-500 border border-emerald-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
+                  <Check className="h-2.5 w-2.5" />
                 </span>
-                <span className="text-muted-foreground font-medium">Fully Correct</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Fully Correct</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-blue-500 border border-blue-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                <span className="w-[18px] h-[18px] rounded-md bg-blue-500 border border-blue-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
                   +1
                 </span>
-                <span className="text-muted-foreground font-medium">Partially Correct</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Partially Correct</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-rose-500 border border-rose-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-                  <X className="h-3 w-3" />
+                <span className="w-[18px] h-[18px] rounded-md bg-rose-500 border border-rose-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
+                  <X className="h-2.5 w-2.5" />
                 </span>
-                <span className="text-muted-foreground font-medium">Wrong Response</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Wrong Response</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-background border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
+                <span className="w-[18px] h-[18px] rounded-md bg-background border border-border flex items-center justify-center text-[9px] font-bold text-muted-foreground shrink-0">
                   0
                 </span>
-                <span className="text-muted-foreground font-medium">Not Answered</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Not Answered</span>
               </div>
             </>
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-emerald-600 border border-emerald-600 shrink-0" />
-                <span className="text-muted-foreground font-medium">Answered</span>
+                <span className="w-[18px] h-[18px] rounded-md bg-emerald-600 border border-emerald-600 shrink-0" />
+                <span className="text-muted-foreground font-semibold text-[10px]">Answered</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-background border border-amber-500 flex items-center justify-center shrink-0">
-                  <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                <span className="w-[18px] h-[18px] rounded-md bg-background border border-amber-500 flex items-center justify-center shrink-0">
+                  <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
                 </span>
-                <span className="text-muted-foreground font-medium">Marked</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Marked</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-emerald-600 border border-emerald-600 flex items-center justify-center relative shrink-0">
-                  <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400 absolute -top-0.5 -right-0.5" />
+                <span className="w-[18px] h-[18px] rounded-md bg-emerald-600 border border-emerald-600 flex items-center justify-center relative shrink-0">
+                  <Star className="h-2 w-2 fill-amber-400 text-amber-400 absolute -top-0.5 -right-0.5" />
                 </span>
-                <span className="text-muted-foreground font-medium">Ans & Marked</span>
+                <span className="text-muted-foreground font-semibold text-[10px]">Ans & Marked</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5.5 h-5.5 rounded-lg bg-background border border-border shrink-0" />
-                <span className="text-muted-foreground font-medium">Not Visited</span>
+                <span className="w-[18px] h-[18px] rounded-md bg-background border border-border shrink-0" />
+                <span className="text-muted-foreground font-semibold text-[10px]">Not Visited</span>
               </div>
             </>
           )}
