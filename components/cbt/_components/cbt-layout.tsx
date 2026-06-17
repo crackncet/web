@@ -46,6 +46,7 @@ interface CbtLayoutProps {
     isPartiallyCorrect: boolean;
     status: string;
   }>;
+  timerText?: string;
   children: React.ReactNode;
 }
 
@@ -64,6 +65,7 @@ export function CbtLayout({
   onSubmit,
   onClose,
   evaluatedResponses = [],
+  timerText,
   children,
 }: CbtLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -100,7 +102,7 @@ export function CbtLayout({
 
           <div className="flex flex-col">
             <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
-              {subjectName} • {isReportMode ? "Practice Report" : "Practice Attempt"}
+              {subjectName} • {isReportMode ? "Exam Report" : mode === "TEST" ? "Exam Attempt" : "Practice Attempt"}
             </span>
             <h1 className="text-xs md:text-sm font-bold text-foreground line-clamp-1 max-w-[150px] sm:max-w-xs md:max-w-md">
               {title}
@@ -111,13 +113,13 @@ export function CbtLayout({
         {/* Right side mode & status chips */}
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-[10px] md:text-xs font-bold text-primary">
-            {isReportMode ? "Review Mode" : "Practice Mode"}
+            {isReportMode ? "Review Mode" : mode === "TEST" ? "Test Mode" : "Practice Mode"}
           </span>
 
-          {mode === "TEST" && (
+          {mode === "TEST" && timerText && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500/10 text-[10px] md:text-xs font-bold text-red-600">
               <Clock className="h-3.5 w-3.5" />
-              <span>02:45:30</span>
+              <span>{timerText}</span>
             </div>
           )}
         </div>

@@ -1,5 +1,12 @@
 import { apiClient, ApiSuccessResponse } from "@/lib/api-client";
 
+export interface PublicTestSeriesSubject {
+  id: string;
+  name: string;
+  type: string;
+  streamName: string;
+}
+
 export interface PublicTestSeriesDetail {
   id: string;
   examId: string;
@@ -12,6 +19,7 @@ export interface PublicTestSeriesDetail {
   streams: string[];
   testCount: number;
   mentorCount: number;
+  subjects: PublicTestSeriesSubject[];
 }
 
 export interface PublicMentor {

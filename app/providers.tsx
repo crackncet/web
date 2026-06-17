@@ -17,12 +17,15 @@ const ReactQueryDevtools = dynamic(
     ),
   { ssr: false },
 );
+import { FrontendApiError } from "@/lib/api-client";
 
 // ─── Factory ────────────────────────────────────────────────────────────────
 function makeQueryClient() {
   return new QueryClient({
     queryCache: new QueryCache({
-      onError: (error) => {
+      onError: (error, query) => {
+        if (query?.meta?.preventToast) return;
+        if (error instanceof FrontendApiError && error.statusCode === 429) return;
         const message =
           error instanceof Error ? error.message : "Something went wrong";
         toast.error(message);
@@ -30,6 +33,7 @@ function makeQueryClient() {
     }),
     mutationCache: new MutationCache({
       onError: (error) => {
+        if (error instanceof FrontendApiError && error.statusCode === 429) return;
         const message =
           error instanceof Error ? error.message : "Something went wrong";
         toast.error(message);

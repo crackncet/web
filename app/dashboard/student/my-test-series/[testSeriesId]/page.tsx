@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ClipboardList, AlertCircle, RefreshCw, Sparkles, Clock, Calendar, Play } from "lucide-react";
+import { ArrowLeft, ClipboardList, AlertCircle, RefreshCw, Sparkles, Clock, Calendar, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentHeader } from "../../layout";
@@ -147,7 +147,10 @@ export default function StudentTestSeriesDetailPage() {
                       timeStyle: "short",
                     });
 
-                    const isUpcoming = new Date(test.scheduledAt) > new Date();
+                    const scheduledTime = new Date(test.scheduledAt).getTime();
+                    const nowTime = Date.now();
+                    const canViewInstructions = scheduledTime - 5 * 60 * 1000 <= nowTime;
+                    const isUpcoming = scheduledTime > nowTime;
 
                     return (
                       <div
@@ -176,7 +179,7 @@ export default function StudentTestSeriesDetailPage() {
                         </div>
 
                         <div className="shrink-0 flex items-center">
-                          {isUpcoming ? (
+                          {isUpcoming && !canViewInstructions ? (
                             <Button
                               disabled
                               variant="secondary"
@@ -184,13 +187,41 @@ export default function StudentTestSeriesDetailPage() {
                             >
                               Locked (Upcoming)
                             </Button>
-                          ) : (
+                          ) : test.attemptStatus === "STARTED" ? (
+                            <Link href={`/dashboard/student/my-test-series/${testSeriesId}/tests/${test.testId}/attempt`}>
+                              <Button
+                                className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4 bg-amber-600 hover:bg-amber-600/90 text-white"
+                              >
+                                <Play className="h-3.5 w-3.5 fill-current" />
+                                Resume Test
+                              </Button>
+                            </Link>
+                          ) : test.attemptStatus === "SUBMITTED" ? (
                             <Button
+                              disabled
                               className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4"
                             >
-                              <Play className="h-3.5 w-3.5 fill-current" />
-                              Attempt Test
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              Evaluating...
                             </Button>
+                          ) : test.attemptStatus === "EVALUATED" ? (
+                            <Link href={`/dashboard/student/my-test-series/${testSeriesId}/tests/${test.testId}/report`}>
+                              <Button
+                                variant="outline"
+                                className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4 border-primary text-primary hover:bg-primary/5"
+                              >
+                                View Report
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Link href={`/dashboard/student/my-test-series/${testSeriesId}/tests/${test.testId}/attempt`}>
+                              <Button
+                                className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4"
+                              >
+                                <Play className="h-3.5 w-3.5 fill-current" />
+                                {isUpcoming ? "View Instructions" : "Attempt Test"}
+                              </Button>
+                            </Link>
                           )}
                         </div>
                       </div>

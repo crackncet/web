@@ -16,6 +16,7 @@ export interface StudentTest {
   description: string | null;
   scheduledAt: string;
   durationMinutes: number;
+  attemptStatus: "STARTED" | "SUBMITTED" | "EVALUATED" | null;
 }
 
 export interface TestSeriesDetail {
