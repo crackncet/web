@@ -12,8 +12,6 @@ import { useCbtReportQuery } from "../../../../_queries/cbt.queries";
 // Modular report components
 import { MetricsGrid } from "./_components/metrics-grid";
 import { DonutChart } from "./_components/donut-chart";
-import { ScoreTrendChart } from "./_components/score-trend-chart";
-import { SectionPerformance } from "./_components/section-performance";
 
 function CbtReportContent() {
   const params = useParams();
@@ -215,55 +213,15 @@ function CbtReportContent() {
         totalCorrect={attempt.totalCorrect}
       />
 
-      {/* 3. Graphical Score Trend (Full Width) */}
-      <div className="w-full">
-        {allAttempts.length > 0 ? (
-          <ScoreTrendChart
-            allAttempts={allAttempts}
-            activeAttemptNumber={attempt.attemptNumber}
-            maxPossibleScore={parseFloat(attempt.maxPossibleScore)}
-            onSelectAttempt={handleSelectAttempt}
-            className="w-full"
-          />
-        ) : (
-          <Card className="rounded-2xl border-border/80 p-6 flex flex-col items-center justify-center text-center w-full">
-            <span className="text-xs text-muted-foreground font-semibold">
-              Mock tests trend will unlock as you complete more exams.
-            </span>
-          </Card>
-        )}
-      </div>
+      <DonutChart
+        title="Performance Overview"
+        data={responseChartData}
+        totalLabel="Total Questions"
+        totalValue={attempt.totalQuestions}
+        className="w-full"
+      />
 
-      {/* 4. Section Performance & Performance Overview Donut Grid */}
-      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
-        {/* Left/Middle: Section Performance progress breakdown */}
-        <div className="lg:col-span-2 flex flex-col justify-stretch">
-          {sections.length > 0 ? (
-            <SectionPerformance
-              sections={sections}
-              questions={questions}
-              responses={evaluatedResponses}
-            />
-          ) : (
-            <Card className="rounded-2xl border-border/80 p-6 flex flex-col items-center justify-center text-center h-full">
-              <span className="text-xs text-muted-foreground font-semibold">
-                No section details configured for this mock paper.
-              </span>
-            </Card>
-          )}
-        </div>
-
-        {/* Right Side: Response Breakdown Donut Chart */}
-        <DonutChart
-          title="Performance Overview"
-          data={responseChartData}
-          totalLabel="Total Questions"
-          totalValue={attempt.totalQuestions}
-          className="h-full"
-        />
-      </div>
-
-      {/* 5. Navigator Board */}
+      {/* 4. Navigator Board */}
       <Card className="rounded-2xl border-border/80 shadow-sm bg-card">
         <CardContent className="p-6">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">

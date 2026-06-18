@@ -73,6 +73,7 @@ export function CbtLayout({
 
   const totalQuestions = questions.length;
   const isReportMode = mode === "REPORT";
+  const activeSections = mode === "TEST" ? [] : sections;
 
   const handlePrev = () => {
     if (currentIndex > 0) {
@@ -148,7 +149,7 @@ export function CbtLayout({
               <div className="flex-1 overflow-hidden">
                 <QuestionNavigator
                   questions={questions}
-                  sections={sections}
+                  sections={activeSections}
                   currentIndex={currentIndex}
                   onSelectIndex={onSelectIndex}
                   responses={responses}
@@ -316,7 +317,7 @@ export function CbtLayout({
               <div className="mt-4 overflow-y-auto max-h-[50vh]">
                 <QuestionNavigator
                   questions={questions}
-                  sections={sections}
+                  sections={activeSections}
                   currentIndex={currentIndex}
                   onSelectIndex={onSelectIndex}
                   responses={responses}

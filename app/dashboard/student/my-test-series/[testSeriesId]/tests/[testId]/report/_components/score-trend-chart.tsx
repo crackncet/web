@@ -199,25 +199,13 @@ export function ScoreTrendChart({
                   onClick={() => onSelectAttempt?.(pt.attempt.id, pt.attempt.attemptNumber)}
                 />
 
-                {/* Outer ring */}
+                {/* Simple smaller dot */}
                 <circle
                   cx={pt.x}
                   cy={pt.y}
-                  r={isActive ? 5.5 : isHovered ? 4.5 : 3.0}
-                  className={cn(
-                    "transition-all duration-200 fill-card stroke-primary",
-                    isActive ? "stroke-[2px]" : "stroke-[1.2px]"
-                  )}
+                  r={isActive ? 3.5 : isHovered ? 3.0 : 2.0}
+                  className="transition-all duration-200 fill-primary stroke-none"
                   style={{ filter: isHovered || isActive ? "url(#cbtGlow)" : undefined }}
-                  pointerEvents="none"
-                />
-
-                {/* Inner core */}
-                <circle
-                  cx={pt.x}
-                  cy={pt.y}
-                  r={isActive ? 2.0 : 1.2}
-                  className="fill-primary"
                   pointerEvents="none"
                 />
 
