@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { AlertTriangle, Maximize, Play, Pause, Volume2, VolumeX, Settings } from "lucide-react";
+import { AlertTriangle, Maximize, Play, Pause, Volume2, VolumeX, Settings, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/hooks/use-user";
 
@@ -29,6 +29,7 @@ export function VideoPlayer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1); // 0 to 1
   const [currentTime, setCurrentTime] = useState(0);
@@ -50,6 +51,7 @@ export function VideoPlayer({
     const finalStreamUrl = streamUrl || demoUrl || `${process.env.NEXT_PUBLIC_API_URL || ""}/library/mediaAssets/shared/${assetId}/stream`;
 
     let hls: Hls | null = null;
+    setIsLoading(true);
 
     // Sync playing/paused/metadata states
     const onPlay = () => setIsPlaying(true);
@@ -60,12 +62,22 @@ export function VideoPlayer({
     const onLoadedMetadata = () => {
       setDuration(video.duration);
     };
+    const onWaiting = () => setIsLoading(true);
+    const onPlaying = () => setIsLoading(false);
+    const onSeeking = () => setIsLoading(true);
+    const onSeeked = () => setIsLoading(false);
+    const onCanPlay = () => setIsLoading(false);
 
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("loadedmetadata", onLoadedMetadata);
     video.addEventListener("durationchange", onLoadedMetadata);
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("seeking", onSeeking);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("canplay", onCanPlay);
 
     const extractTokenFromUrl = (urlStr: string): string => {
       try {
@@ -165,6 +177,11 @@ export function VideoPlayer({
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
       video.removeEventListener("durationchange", onLoadedMetadata);
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("seeking", onSeeking);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("canplay", onCanPlay);
       if (hls) {
         hls.destroy();
       }
@@ -434,6 +451,17 @@ export function VideoPlayer({
         className="w-full h-full object-contain cursor-pointer"
         playsInline
       />
+
+      {/* Loading Spinner */}
+      {isLoading && !securityViolation && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 pointer-events-none transition-all duration-300">
+          <div className="relative flex items-center justify-center">
+            {/* Pulsing ring */}
+            <span className="absolute inline-flex h-16 w-16 rounded-full bg-white/10 animate-ping" />
+            <Loader2 className="h-10 w-10 text-white animate-spin relative z-10" />
+          </div>
+        </div>
+      )}
 
       {/* Transparent Watermark canvas overlay */}
       {showWatermark && !securityViolation && (
