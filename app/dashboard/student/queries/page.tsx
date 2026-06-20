@@ -160,7 +160,7 @@ export default function StudentQueriesPage() {
   const isFiltersActive = searchVal || startDate || endDate;
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
       <StudentHeader>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-violet-500" />

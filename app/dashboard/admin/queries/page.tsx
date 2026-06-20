@@ -131,7 +131,7 @@ export default function AdminQueriesPage() {
   const isFiltersActive = searchVal || startDate || endDate;
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Top Header Portal Injection */}
       <AdminHeader>
         <div className="flex flex-col">
