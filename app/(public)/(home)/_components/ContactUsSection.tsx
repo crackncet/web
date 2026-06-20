@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import LoginDialog from "@/components/dialogs/LoginDialog";
-import { useSubmitContactQuery } from "../_queries/contact.queries";
+import { useSubmitQuery } from "@/hooks/use-queries";
 
 // Shadcn UI components
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function ContactUsSection() {
   const [showLogin, setShowLogin] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { data: user, isLoading: isUserLoading } = useUser();
-  const { mutate: submitQuery, isPending: isSubmitting } = useSubmitContactQuery();
+  const { mutate: submitQuery, isPending: isSubmitting } = useSubmitQuery();
 
   useEffect(() => {
     setMounted(true);
