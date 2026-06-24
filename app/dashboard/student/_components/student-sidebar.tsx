@@ -79,7 +79,7 @@ export function AppSidebar() {
         },
         {
           title: "Doubts",
-          url: "/dashboard/student/my-doubts",
+          url: "/dashboard/student/doubts",
           icon: Group,
         }
       ],

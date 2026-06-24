@@ -13,6 +13,7 @@ import {
   User,
   LogOut,
   ChevronUp,
+  MessageSquare,
 } from "lucide-react";
 
 import { useUser, useLogout } from "@/hooks/use-user";
@@ -84,6 +85,11 @@ export function MemberSidebar() {
           title: "Test Series",
           url: "/dashboard/member/test-series",
           icon: GraduationCap,
+        },
+        {
+          title: "Doubt Queue",
+          url: "/dashboard/member/doubts",
+          icon: MessageSquare,
         },
       ],
     },

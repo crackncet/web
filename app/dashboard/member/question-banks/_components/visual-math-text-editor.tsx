@@ -112,31 +112,78 @@ export function VisualMathTextEditor({
 // ─── KaTeX Live Preview Component ───────────────────────────────────────────
 function KaTeXPreview({ text }: { text: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [katexLoaded, setKatexLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const renderMath = () => {
-      const renderMathInElement = (window as any).renderMathInElement;
-      if (renderMathInElement && containerRef.current) {
-        containerRef.current.textContent = text;
-        try {
-          renderMathInElement(containerRef.current, {
-            delimiters: [
-              { left: "$$", right: "$$", display: true },
-              { left: "$", right: "$", display: false },
-            ],
-            throwOnError: false,
-          });
-        } catch (e) {
-          console.warn("KaTeX rendering error", e);
-        }
+
+    if (!document.getElementById("katex-css")) {
+      const link = document.createElement("link");
+      link.id = "katex-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css";
+      document.head.appendChild(link);
+    }
+
+    const loadScripts = async () => {
+      if ((window as any).renderMathInElement) {
+        setKatexLoaded(true);
+        return;
+      }
+
+      const loadScript = (id: string, src: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const existing = document.getElementById(id) as HTMLScriptElement | null;
+          if (existing) {
+            if ((window as any).renderMathInElement || (id === "katex-js" && (window as any).katex)) {
+              resolve();
+            } else {
+              existing.addEventListener("load", () => resolve());
+              existing.addEventListener("error", () => reject());
+            }
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.id = id;
+          script.src = src;
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject();
+          document.head.appendChild(script);
+        });
+      };
+
+      try {
+        await loadScript("katex-js", "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js");
+        await loadScript("katex-auto-render-js", "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js");
+        setKatexLoaded(true);
+      } catch (err) {
+        console.error("Failed to load KaTeX", err);
       }
     };
 
-    renderMath();
-    const timer = setTimeout(renderMath, 60);
-    return () => clearTimeout(timer);
-  }, [text]);
+    loadScripts();
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.textContent = text;
+
+    if (katexLoaded && (window as any).renderMathInElement) {
+      try {
+        (window as any).renderMathInElement(containerRef.current, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+          ],
+          throwOnError: false,
+        });
+      } catch (e) {
+        console.warn("KaTeX rendering error", e);
+      }
+    }
+  }, [text, katexLoaded]);
 
   return (
     <div
