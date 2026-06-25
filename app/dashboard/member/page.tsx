@@ -120,26 +120,6 @@ export default function MemberPage() {
         <span className="font-extrabold text-slate-850 dark:text-white">Workspace Overview</span>
       </MemberHeader>
 
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-650 text-white rounded-2xl p-6 md:p-8 select-none shadow-xs border border-violet-700/25">
-        <div className="relative z-10 space-y-2 max-w-2xl">
-          {user?.isHod && (
-            <span className="inline-flex items-center gap-1 bg-white/10 backdrop-blur-xs border border-white/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase text-violet-100">
-              <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
-              Stream HOD
-            </span>
-          )}
-          <h1 className="text-xl md:text-2xl font-black tracking-tight">
-            Welcome back, {user?.fullName || "Faculty"}!
-          </h1>
-          <p className="text-xs md:text-sm text-violet-100 font-medium leading-relaxed">
-            Manage your academic timeline, review student doubts, and maintain your subject's resources.
-          </p>
-        </div>
-        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-          <GraduationCap className="h-44 w-44 -mr-6 -mb-6 transform rotate-12" />
-        </div>
-      </div>
 
       {/* Stats Summary Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -91,12 +91,7 @@ export function AppSidebar() {
           title: "Queries",
           url: "/dashboard/student/queries",
           icon: MessageSquare,
-        },
-        {
-          title: "Analytics",
-          url: "/dashboard/student/analytics",
-          icon: BarChart3,
-        },
+        }
       ],
     },
   ];
