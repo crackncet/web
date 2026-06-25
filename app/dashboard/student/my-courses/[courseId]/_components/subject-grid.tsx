@@ -19,9 +19,7 @@ export function SubjectGrid({ courseId, subjects }: SubjectGridProps) {
 
       <div className="space-y-3">
         {subjects.map((subject, index) => {
-          // Deterministic progress based on subject ID to keep it stable
-          const charCodeSum = subject.courseSubjectId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          const progress = (charCodeSum % 41) + 10; // 10% to 50%
+          const progress = subject.progressPercentage ?? 0;
 
           return (
             <Link

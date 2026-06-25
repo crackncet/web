@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, AlertCircle, ChevronDown, ChevronRight, Lock, Video, FileText, HelpCircle, Laptop } from "lucide-react";
+import { ArrowLeft, BookOpen, AlertCircle, ChevronDown, ChevronRight, Lock, Video, FileText, HelpCircle, Laptop, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentHeader } from "../../../../layout";
@@ -129,6 +129,7 @@ export default function StudentSubjectDetailPage() {
               <div className="space-y-3">
                 {subject.chapters.map((chapter) => {
                   const isExpanded = !!expandedChapters[chapter.chapterId];
+                  const progress = chapter.progressPercentage ?? 0;
                   return (
                     <div
                       key={chapter.chapterId}
@@ -145,7 +146,10 @@ export default function StudentSubjectDetailPage() {
                           </span>
                           <span className="line-clamp-1">{chapter.name}</span>
                         </div>
-                        <div className="shrink-0 text-muted-foreground">
+                        <div className="flex items-center gap-3 shrink-0 text-muted-foreground">
+                          <span className="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full select-none">
+                            {progress}% Completed
+                          </span>
                           {isExpanded ? (
                             <ChevronDown className="h-4 w-4" />
                           ) : (
@@ -171,6 +175,7 @@ export default function StudentSubjectDetailPage() {
                                     notesAssetId: chapter.notesAssetId,
                                     dppBankId: chapter.chapterPracticeBankId,
                                     scheduledUnlockAt: null,
+                                    isDppCompleted: chapter.isChapterPracticeCompleted,
                                   },
                                   ...chapter.topics,
                                 ]
@@ -207,19 +212,25 @@ export default function StudentSubjectDetailPage() {
                                   </div>
 
                                   {/* Right Section: Material Icons */}
-                                  <div className="flex items-center gap-2 shrink-0">
+                                  <div className="flex items-center gap-2.5 shrink-0">
                                     {locked ? (
                                       <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                                     ) : (
                                       <>
                                         {topic.videoLectureId && (
-                                          <Video className="h-3.5 w-3.5 text-primary" />
+                                          <div className="flex items-center gap-1">
+                                            <Video className={`h-3.5 w-3.5 ${topic.isVideoCompleted ? "text-emerald-500" : "text-primary"}`} />
+                                            {topic.isVideoCompleted && <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />}
+                                          </div>
                                         )}
                                         {topic.notesAssetId && (
                                           <FileText className="h-3.5 w-3.5 text-indigo-500" />
                                         )}
                                         {topic.dppBankId && (
-                                          <HelpCircle className="h-3.5 w-3.5 text-emerald-500" />
+                                          <div className="flex items-center gap-1">
+                                            <HelpCircle className={`h-3.5 w-3.5 ${topic.isDppCompleted ? "text-emerald-500" : "text-emerald-500"}`} />
+                                            {topic.isDppCompleted && <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />}
+                                          </div>
                                         )}
                                         {topic.liveLectureId && (
                                           <Laptop className="h-3.5 w-3.5 text-amber-500" />

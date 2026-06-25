@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StudentHeader } from "../../layout";
 import { useStudentCourseDetailQuery } from "./_queries/course-detail.queries";
 import { CourseAnalyticsPlaceholder } from "./_components/course-analytics-placeholder";
-import { ContinueLearningPlaceholder } from "./_components/continue-learning-placeholder";
 import { SubjectGrid } from "./_components/subject-grid";
 import Image from "next/image";
 
@@ -96,7 +95,10 @@ export default function StudentCourseDetailPage() {
         {!isLoading && !isError && syllabus && (
           <>
             {/* Performance Analytics Section */}
-            <CourseAnalyticsPlaceholder />
+            <CourseAnalyticsPlaceholder
+              overallProgressPercentage={syllabus.overallProgressPercentage}
+              stats={syllabus.stats}
+            />
 
             
             {/* Course Summary Banner */}
@@ -130,13 +132,6 @@ export default function StudentCourseDetailPage() {
                 </div>
               </div>
             </div>
-
-            {/* Continue Learning Section */}
-            <ContinueLearningPlaceholder
-              courseId={courseId}
-              defaultSubjectId={firstSubject?.courseSubjectId}
-              defaultTopicId={firstTopic?.topicId}
-            />
 
             {/* Subjects Grid Section */}
             {syllabus.subjects.length === 0 ? (

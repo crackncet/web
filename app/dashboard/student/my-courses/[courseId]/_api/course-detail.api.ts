@@ -10,6 +10,8 @@ export interface Topic {
   notesAssetId: string | null;
   dppBankId: string | null;
   scheduledUnlockAt: string | null;
+  isVideoCompleted?: boolean;
+  isDppCompleted?: boolean;
 }
 
 export interface Chapter {
@@ -20,6 +22,16 @@ export interface Chapter {
   chapterPracticeBankId: string | null;
   notesAssetId: string | null;
   topics: Topic[];
+  isChapterPracticeCompleted?: boolean;
+  progressPercentage?: number;
+  stats?: {
+    videos: { total: number; completed: number };
+    dpps: { total: number; completed: number };
+    chapterPractice: {
+      hasPractice: boolean;
+      completed: boolean;
+    };
+  };
 }
 
 export interface SubjectSyllabus {
@@ -28,6 +40,12 @@ export interface SubjectSyllabus {
   subjectName: string;
   subjectType: string;
   chapters: Chapter[];
+  progressPercentage?: number;
+  stats?: {
+    videos: { total: number; completed: number };
+    dpps: { total: number; completed: number };
+    chapterPractices: { total: number; completed: number };
+  };
 }
 
 export interface CourseDetailSyllabus {
@@ -37,12 +55,29 @@ export interface CourseDetailSyllabus {
     description: string | null;
     banner: string | null;
   };
+  overallProgressPercentage?: number;
+  stats?: {
+    videos: { total: number; completed: number };
+    dpps: { total: number; completed: number };
+    chapterPractices: { total: number; completed: number };
+  };
   subjects: SubjectSyllabus[];
 }
 
 export async function getCourseDetailSyllabus(courseId: string) {
   const response = await apiClient.get<ApiSuccessResponse<CourseDetailSyllabus>>(
-    `/classroom/courses/${courseId}`
+    `/classroom/progress/course/${courseId}`
   );
+  return response.data;
+}
+
+export async function toggleVideoProgress(body: {
+  topicId: string;
+  videoAssetId: string;
+  isCompleted: boolean;
+}) {
+  const response = await apiClient.post<
+    ApiSuccessResponse<{ success: boolean; isCompleted: boolean }>
+  >("/classroom/progress/video/toggle", body);
   return response.data;
 }

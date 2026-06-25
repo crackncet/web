@@ -15,11 +15,12 @@ import {
   ExternalLink,
   ChevronRight,
   Maximize2,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentHeader } from "../../../../../../layout";
-import { useStudentCourseDetailQuery } from "../../../../_queries/course-detail.queries";
+import { useStudentCourseDetailQuery, useToggleVideoProgressMutation } from "../../../../_queries/course-detail.queries";
 import { useSharedAssetDetailQuery } from "@/app/dashboard/member/media/_queries/media.queries";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 
@@ -48,6 +49,8 @@ export default function StudentTopicDetailPage() {
   const { data: response, isLoading: isSyllabusLoading, isError: isSyllabusError } =
     useStudentCourseDetailQuery(courseId);
   const syllabus = response?.data;
+
+  const { mutate: toggleWatchStatus, isPending } = useToggleVideoProgressMutation(courseId);
 
   // Locate the topic inside syllabus subjects & chapters
   const subject = syllabus?.subjects.find((sub) => sub.courseSubjectId === courseSubjectId);
@@ -277,16 +280,40 @@ export default function StudentTopicDetailPage() {
             <div className="flex flex-col gap-2">
               {/* Video Button */}
               {hasVideo && (
-                <Button
-                  onClick={() => handleAssetSelect(topic.videoLectureId, "VIDEO")}
-                  variant={activeAssetType === "VIDEO" ? "default" : "outline"}
-                  className="w-full justify-start gap-3 text-xs font-semibold min-h-[44px] px-3.5"
-                >
-                  <Video className="h-4 w-4 shrink-0" />
-                  <div className="flex flex-col items-start text-left">
-                    <span>Watch Video Lecture</span>
-                  </div>
-                </Button>
+                <div className="space-y-2 border border-border/60 rounded-xl p-2.5 bg-muted/20">
+                  <Button
+                    onClick={() => handleAssetSelect(topic.videoLectureId, "VIDEO")}
+                    variant={activeAssetType === "VIDEO" ? "default" : "outline"}
+                    className="w-full justify-start gap-3 text-xs font-semibold min-h-[44px] px-3.5 shadow-xs"
+                  >
+                    <Video className="h-4 w-4 shrink-0" />
+                    <div className="flex flex-col items-start text-left">
+                      <span>Watch Video Lecture</span>
+                    </div>
+                    {topic.isVideoCompleted && (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 ml-auto shrink-0 fill-emerald-500/10" />
+                    )}
+                  </Button>
+
+                  <label className="flex items-center gap-2 px-2 py-1 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!!topic.isVideoCompleted}
+                      disabled={isPending}
+                      onChange={(e) => {
+                        toggleWatchStatus({
+                          topicId: topic.topicId,
+                          videoAssetId: topic.videoLectureId,
+                          isCompleted: e.target.checked,
+                        });
+                      }}
+                      className="rounded border-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      {topic.isVideoCompleted ? "Completed" : "Mark as Completed"}
+                    </span>
+                  </label>
+                </div>
               )}
 
               {/* Revision Notes Button */}
@@ -315,6 +342,9 @@ export default function StudentTopicDetailPage() {
                   >
                     <HelpCircle className="h-4 w-4 text-emerald-500 shrink-0" />
                     <span>Practice DPP Questions</span>
+                    {topic.isDppCompleted && (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 ml-auto shrink-0 fill-emerald-500/10" />
+                    )}
                   </Button>
                 </Link>
               )}

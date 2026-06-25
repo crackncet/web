@@ -38,9 +38,34 @@ export function VideoPlayer({
   const [qualities, setQualities] = useState<{ id: number; height: number }[]>([]);
   const [currentQuality, setCurrentQuality] = useState<number>(-1); // -1 = Auto
   const [showSettings, setShowSettings] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [hlsInstance, setHlsInstance] = useState<Hls | null>(null);
 
   const email = user?.email || "student@crackncet.com";
+
+  // Keep native playback speed in sync with state
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const syncPlaybackRate = () => {
+      if (video.playbackRate !== playbackSpeed) {
+        video.playbackRate = playbackSpeed;
+      }
+    };
+
+    video.addEventListener("play", syncPlaybackRate);
+    video.addEventListener("ratechange", syncPlaybackRate);
+    
+    // Apply speed immediately
+    video.playbackRate = playbackSpeed;
+
+    return () => {
+      video.removeEventListener("play", syncPlaybackRate);
+      video.removeEventListener("ratechange", syncPlaybackRate);
+    };
+  }, [playbackSpeed]);
 
   // 1. Initialize Video Stream (HLS or Native)
   useEffect(() => {
@@ -188,11 +213,13 @@ export function VideoPlayer({
     };
   }, [assetId, demoUrl, streamUrl]);
 
-  // 2. Playback Control
   const togglePlay = () => {
     if (securityViolation) return;
     const video = videoRef.current;
     if (!video) return;
+
+    setShowSettings(false);
+    setShowSpeedMenu(false);
 
     if (video.paused) {
       video.play().catch(() => {});
@@ -555,6 +582,41 @@ export function VideoPlayer({
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Playback Speed selector */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-white hover:bg-white/10 rounded-lg cursor-pointer text-xs font-bold font-mono"
+                  onClick={() => {
+                    setShowSpeedMenu(!showSpeedMenu);
+                    setShowSettings(false);
+                  }}
+                >
+                  {playbackSpeed}x
+                </Button>
+                {showSpeedMenu && (
+                  <div className="absolute right-0 bottom-10 bg-black/90 border border-white/10 rounded-xl p-2 w-24 text-xs text-white flex flex-col gap-1 shadow-lg z-30">
+                    <span className="font-bold border-b border-white/10 pb-1 text-[10px] text-muted-foreground uppercase tracking-wider select-none">Speed</span>
+                    {[1, 1.5, 2, 2.5].map((speed) => (
+                      <button
+                        key={speed}
+                        type="button"
+                        onClick={() => {
+                          setPlaybackSpeed(speed);
+                          setShowSpeedMenu(false);
+                        }}
+                        className={`text-left px-1.5 py-1 rounded hover:bg-white/10 transition font-mono ${
+                          playbackSpeed === speed ? "text-violet-400 font-bold" : ""
+                        }`}
+                      >
+                        {speed}x
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Settings Quality selector */}
               {qualities.length > 0 && (
                 <div className="relative">
@@ -562,14 +624,18 @@ export function VideoPlayer({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-white hover:bg-white/10 rounded-lg cursor-pointer"
-                    onClick={() => setShowSettings(!showSettings)}
+                    onClick={() => {
+                      setShowSettings(!showSettings);
+                      setShowSpeedMenu(false);
+                    }}
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
                   {showSettings && (
                     <div className="absolute right-0 bottom-10 bg-black/90 border border-white/10 rounded-xl p-2 w-28 text-xs text-white flex flex-col gap-1.5 shadow-lg z-30">
-                      <span className="font-bold border-b border-white/10 pb-1 text-[10px] text-muted-foreground uppercase tracking-wider">Quality</span>
+                      <span className="font-bold border-b border-white/10 pb-1 text-[10px] text-muted-foreground uppercase tracking-wider select-none">Quality</span>
                       <button
+                        type="button"
                         onClick={() => changeQuality(-1)}
                         className={`text-left px-1.5 py-1 rounded hover:bg-white/10 transition ${currentQuality === -1 ? "text-violet-400 font-bold" : ""}`}
                       >
@@ -578,6 +644,7 @@ export function VideoPlayer({
                       {qualities.map((q) => (
                         <button
                           key={q.id}
+                          type="button"
                           onClick={() => changeQuality(q.id)}
                           className={`text-left px-1.5 py-1 rounded hover:bg-white/10 transition ${currentQuality === q.id ? "text-violet-400 font-bold" : ""}`}
                         >
