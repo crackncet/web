@@ -12,6 +12,7 @@ import { AskDoubtDrawer } from "./_components/ask-doubt-drawer";
 import { DoubtFilters } from "./_components/doubt-filters";
 import { Plus, HelpCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StudentHeader } from "../layout";
 
 export default function StudentDoubtsPage() {
   const [filters, setFilters] = useState<GetStudentDoubtsFilters>({
@@ -42,28 +43,26 @@ export default function StudentDoubtsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto p-4 md:p-6 animate-in fade-in duration-300">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none">
-        <div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            <span>Classroom</span>
-            <span className="text-muted-foreground/30">/</span>
-            <span className="text-primary/95">Doubt Desk</span>
+    <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-300">
+      {/* StudentHeader for Top Bar portal injection */}
+      <StudentHeader>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-lg font-bold text-foreground md:text-xl">Doubt Desk</h1>
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              Submit and track your doubts with our academic and support staff
+            </p>
           </div>
-          <h1 className="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100 mt-1 select-none">
-            Doubt Desk
-          </h1>
-        </div>
 
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="cursor-pointer gap-1.5 font-bold shadow-xs hover:shadow-sm rounded-xl text-xs px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Ask Doubt</span>
-        </Button>
-      </div>
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="cursor-pointer gap-1.5 font-bold shadow-xs hover:shadow-sm rounded-xl text-xs px-4"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Ask Doubt</span>
+          </Button>
+        </div>
+      </StudentHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Filters Sidebar */}

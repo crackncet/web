@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { StudentHeader } from "../../layout";
 
 interface PageProps {
   params: Promise<{ doubtId: string }>;
@@ -71,31 +72,41 @@ export default function StudentDoubtDetailPage({ params }: PageProps) {
   const { doubt, replies } = data;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto p-4 md:p-6 animate-in fade-in duration-300">
-      {/* Upper navigation */}
-      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 select-none">
-        <Link
-          href="/dashboard/student/doubts"
-          className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-foreground transition-colors group"
-        >
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Doubt Desk</span>
-        </Link>
-        {doubt.status !== "RESOLVED" && (
-          <Button
-            onClick={handleResolve}
-            disabled={resolveDoubtMutation.isPending}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 font-bold rounded-xl text-xs px-4 cursor-pointer"
-          >
-            {resolveDoubtMutation.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <CheckCircle className="h-3.5 w-3.5" />
-            )}
-            <span>Mark as Solved</span>
-          </Button>
-        )}
-      </div>
+    <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-300">
+      {/* StudentHeader for Top Bar portal injection */}
+      <StudentHeader>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/student/doubts">
+              <Button
+                variant="outline"
+                className="h-7 w-7 rounded-lg border-slate-200 dark:border-slate-800 cursor-pointer p-0 flex items-center justify-center"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+            <h1 className="text-lg font-bold text-foreground md:text-xl truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+              {doubt.title}
+            </h1>
+          </div>
+
+          {doubt.status !== "RESOLVED" && (
+            <Button
+              onClick={handleResolve}
+              disabled={resolveDoubtMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 font-bold rounded-xl text-xs px-4 cursor-pointer h-9"
+            >
+              {resolveDoubtMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <CheckCircle className="h-3.5 w-3.5" />
+              )}
+              <span>Mark as Solved</span>
+            </Button>
+          )}
+        </div>
+      </StudentHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Chat window thread */}
@@ -116,7 +127,7 @@ export default function StudentDoubtDetailPage({ params }: PageProps) {
               <div>
                 <p className="font-bold">This doubt has been marked as solved</p>
                 <p className="mt-0.5 opacity-90">
-                  If you have further follow-up questions, sending a message in the input above will automatically reopen this doubt query.
+                  This thread is closed and no further replies can be sent.
                 </p>
               </div>
             </div>
