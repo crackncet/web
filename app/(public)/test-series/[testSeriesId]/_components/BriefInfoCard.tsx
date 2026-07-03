@@ -9,34 +9,8 @@ interface BriefInfoCardProps {
 }
 
 export function BriefInfoCard({ price, banner, title, onEnrollClick }: BriefInfoCardProps) {
-  // Coupon state
-  const [couponCode, setCouponCode] = useState("");
-  const [discountPercent, setDiscountPercent] = useState(0);
-  const [couponError, setCouponError] = useState("");
-  const [couponSuccess, setCouponSuccess] = useState("");
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCouponError("");
-    setCouponSuccess("");
-    
-    if (couponCode.trim().toUpperCase() === "NCET10") {
-      setDiscountPercent(10);
-      setCouponSuccess("Coupon Applied! 10% Discount active.");
-    } else if (couponCode.trim().toUpperCase() === "WELCOME20") {
-      setDiscountPercent(20);
-      setCouponSuccess("Welcome Coupon Applied! 20% Discount active.");
-    } else if (couponCode.trim() === "") {
-      setCouponError("Please enter a coupon code");
-    } else {
-      setCouponError("Invalid coupon code");
-      setDiscountPercent(0);
-    }
-  };
 
   const basePriceNum = parseFloat(price) || 0;
-  const discountAmount = basePriceNum * (discountPercent / 100);
-  const finalPrice = basePriceNum - discountAmount;
 
   return (
     <aside className="w-full lg:w-96 shrink-0 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-xs sticky top-24 self-start space-y-6 select-none">
@@ -69,55 +43,7 @@ export function BriefInfoCard({ price, banner, title, onEnrollClick }: BriefInfo
           <span>Base Price</span>
           <span className="font-bold text-slate-700 dark:text-slate-350">₹{basePriceNum.toLocaleString("en-IN")}</span>
         </div>
-
-        {discountPercent > 0 && (
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <span>Discount ({discountPercent}%)</span>
-            <span className="text-emerald-600 dark:text-emerald-500 font-bold">
-              - ₹{discountAmount.toLocaleString("en-IN")}
-            </span>
-          </div>
-        )}
-
-        <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex justify-between items-center">
-          <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">Final Price</span>
-          <span className="text-lg font-black text-slate-955 dark:text-white">
-            ₹{finalPrice.toLocaleString("en-IN")}
-          </span>
-        </div>
       </div>
-
-      {/* Coupon Application Form */}
-      <form onSubmit={handleApplyCoupon} className="space-y-2 pt-2">
-        <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-          Apply Coupon
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="e.g. NCET10"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            className="flex-1 h-9 px-3 text-xs font-semibold bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-855 rounded-lg focus:outline-none focus:ring-1 focus:ring-violet-500 placeholder:text-slate-400 uppercase"
-          />
-          <button 
-            type="submit" 
-            className="h-9 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-950 font-bold text-xs rounded-lg transition-colors cursor-pointer"
-          >
-            Apply
-          </button>
-        </div>
-        {couponError && (
-          <span className="text-[10px] font-semibold text-red-500 block animate-in fade-in duration-150">
-            {couponError}
-          </span>
-        )}
-        {couponSuccess && (
-          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 block animate-in fade-in duration-150">
-            {couponSuccess}
-          </span>
-        )}
-      </form>
 
       {/* CTA action button */}
       <div className="pt-2">

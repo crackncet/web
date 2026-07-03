@@ -116,6 +116,11 @@ export function AppSidebar() {
           icon: DollarSign,
         },
         {
+          title: "Coupons",
+          url: "/dashboard/admin/coupons",
+          icon: Tags,
+        },
+        {
           title: "Analytics",
           url: "/dashboard/admin/analytics",
           icon: BarChart3,

@@ -12,7 +12,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { PublicTestSeriesDetail } from "../_api/test-series-detail.api";
-import { Check, Loader2, Lock, ShieldCheck, BookOpen, Layers } from "lucide-react";
+import { Check, Loader2, Lock, ShieldCheck, BookOpen, Layers, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 import { useUser } from "@/hooks/use-user";
@@ -30,8 +30,6 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
   const { data: user, isLoading: isUserLoading } = useUser();
 
   const priceNum = parseFloat(testSeries.price) || 0;
-  const couponDiscount = 0; // Dummy coupon discount (for future implementation)
-  const totalAmount = priceNum - couponDiscount;
 
   // States
   const [selectedOptionalStream, setSelectedOptionalStream] = useState<string>("");
@@ -41,6 +39,18 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
   const [isMobile, setIsMobile] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isModalBehaviorDisabled, setIsModalBehaviorDisabled] = useState(false);
+
+  // Coupon States
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountApplied: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  const couponDiscount = appliedCoupon ? appliedCoupon.discountApplied : 0;
+  const totalAmount = Math.max(0, priceNum - couponDiscount);
 
   // Detect screen size on client side
   useEffect(() => {
@@ -58,6 +68,9 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
       setSelectedSubjects([]);
       setEnrollmentSuccess(false);
       setIsModalBehaviorDisabled(false);
+      setCouponCodeInput("");
+      setAppliedCoupon(null);
+      setCouponError("");
     }
   }, [isOpen]);
 
@@ -204,6 +217,43 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
   const { isValid, status } = validate();
 
   // Submit enrollment selection
+  const handleApplyCoupon = async () => {
+    if (!couponCodeInput.trim()) return;
+    setIsValidatingCoupon(true);
+    setCouponError("");
+    try {
+      const res = await apiClient.post<any>("/payments/coupons/validate", {
+        code: couponCodeInput.trim(),
+        itemType: "TEST_SERIES",
+        referenceId: testSeries.id,
+        amount: priceNum,
+      });
+
+      const data = res.data.data;
+      if (data.valid) {
+        setAppliedCoupon({
+          code: couponCodeInput.trim().toUpperCase(),
+          discountApplied: parseFloat(data.discountApplied) || 0,
+        });
+        toast.success("Coupon applied successfully!");
+      } else {
+        setCouponError("Coupon validation failed.");
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Failed to validate coupon.";
+      setCouponError(msg);
+      toast.error(msg);
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCodeInput("");
+    setCouponError("");
+  };
+
   const handleEnrollSubmit = async () => {
     if (!isValid) {
       toast.error("Please satisfy all subject selection rules before enrolling.");
@@ -236,6 +286,7 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
         itemType: "TEST_SERIES",
         referenceId: testSeries.id,
         subjectIds: selectedSubjects,
+        couponCode: appliedCoupon ? appliedCoupon.code : undefined,
       });
 
       const { order, razorpayOrder, keyId } = orderRes.data.data;
@@ -615,7 +666,53 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
               </div>
 
               {/* Final Submission Card */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-850 rounded-2xl p-5 space-y-4 shadow-xs">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-855 rounded-2xl p-5 space-y-4 shadow-xs">
+                
+                {/* Coupon Code Section */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-405 block">
+                    Have a coupon code?
+                  </label>
+                  {!appliedCoupon ? (
+                    <div className="space-y-1">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponCodeInput}
+                          onChange={(e) => setCouponCodeInput(e.target.value)}
+                          placeholder="ENTER CODE"
+                          className="flex-1 min-w-0 px-3 h-9 text-xs font-bold uppercase tracking-wider rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 focus:outline-none focus:border-violet-500 text-slate-900 dark:text-slate-100"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={isValidatingCoupon || !couponCodeInput.trim()}
+                          className="px-4 h-9 bg-slate-900 hover:bg-slate-850 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold uppercase text-[10px] tracking-wider rounded-xl shadow-xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isValidatingCoupon ? "..." : "Apply"}
+                        </button>
+                      </div>
+                      {couponError && (
+                        <p className="text-[10px] font-bold text-rose-500">{couponError}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between px-3 h-9 bg-emerald-50 dark:bg-emerald-955/20 border border-emerald-250 dark:border-emerald-900/30 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+                        {appliedCoupon.code} APPLIED
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-[10px] font-black uppercase text-rose-600 dark:text-rose-455 hover:underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2 text-xs border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div className="flex justify-between text-slate-500 dark:text-slate-400">
                     <span>Test Series Price</span>
@@ -669,7 +766,7 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
       <Sheet open={isOpen} onOpenChange={handleOpenChange} modal={!isModalBehaviorDisabled}>
         <SheetContent 
           side="bottom" 
-          className="h-[75vh] max-h-[75vh] w-full overflow-y-auto rounded-t-[2rem] bg-slate-50 dark:bg-slate-950 p-6 border-t border-slate-200 dark:border-slate-850 select-none"
+          className="h-[75vh] max-h-[75vh] w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-t-[2rem] bg-slate-50 dark:bg-slate-950 p-6 border-t border-slate-200 dark:border-slate-850 select-none"
           onPointerDownOutside={(e) => { if (isSubmitting) e.preventDefault(); }}
           onEscapeKeyDown={(e) => { if (isSubmitting) e.preventDefault(); }}
         >
@@ -684,7 +781,7 @@ export function EnrollmentDialog({ isOpen, onClose, testSeries }: EnrollmentDial
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange} modal={!isModalBehaviorDisabled}>
       <DialogContent 
-        className="w-[90vw] max-w-[90vw] sm:w-[80vw] sm:max-w-[80vw] md:w-[70vw] md:max-w-[70vw] lg:w-[60vw] lg:max-w-[60vw] xl:w-[60vw] xl:max-w-[60vw] max-h-[85vh] overflow-y-auto rounded-3xl bg-slate-50 dark:bg-slate-950 p-6 md:p-8 border border-slate-200 dark:border-slate-850 shadow-2xl select-none"
+        className="w-[90vw] max-w-[90vw] sm:w-[80vw] sm:max-w-[80vw] md:w-[70vw] md:max-w-[70vw] lg:w-[60vw] lg:max-w-[60vw] xl:w-[60vw] xl:max-w-[60vw] max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-3xl bg-slate-50 dark:bg-slate-950 p-6 md:p-8 border border-slate-200 dark:border-slate-850 shadow-2xl select-none"
         onPointerDownOutside={(e) => { if (isSubmitting) e.preventDefault(); }}
         onEscapeKeyDown={(e) => { if (isSubmitting) e.preventDefault(); }}
       >
