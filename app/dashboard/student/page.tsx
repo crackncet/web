@@ -18,6 +18,9 @@ import {
   Sparkles,
   ExternalLink,
   MessageCircle,
+  GraduationCap,
+  Flame,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,9 +29,11 @@ import { useStudentCoursesQuery } from "./my-courses/_queries/my-courses.queries
 import { useStudentTestSeriesQuery } from "./my-test-series/_queries/my-test-series.queries";
 import { useStudentDoubtsQuery } from "./doubts/_queries/doubts.queries";
 import { useStudentQueries } from "@/hooks/use-queries";
+import { useUser } from "@/hooks/use-user";
 
 export default function StudentDashboardPage() {
   // 1. Fetch Student Data
+  const { data: user } = useUser();
   const { data: coursesResponse, isLoading: isLoadingCourses } = useStudentCoursesQuery();
   const { data: testSeriesResponse, isLoading: isLoadingTestSeries } = useStudentTestSeriesQuery();
   const { data: doubtsResponse, isLoading: isLoadingDoubts } = useStudentDoubtsQuery({ page: 1, limit: 3 });
@@ -38,6 +43,15 @@ export default function StudentDashboardPage() {
   const testSeriesList = testSeriesResponse?.data || [];
   const doubts = doubtsResponse?.data || [];
   const queries = queriesResponse?.queries || [];
+
+  const firstName = user?.fullName ? user.fullName.split(" ")[0] : "Student";
+
+  const getGreeting = () => {
+    const hr = new Date().getHours();
+    if (hr < 12) return "Good morning";
+    if (hr < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   // Helper styles for doubt statuses
   const getDoubtStatusStyle = (status: string) => {
@@ -71,13 +85,13 @@ export default function StudentDashboardPage() {
         </div>
       </StudentHeader>
 
-      {/* Header section (Explicitly NO welcome banner card) */}
-      <div className="flex flex-col gap-1 pb-1">
-        <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-          Dashboard Overview
-        </h1>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">
-          Track your active courses, scheduled mock exams, and query resolutions in one unified place.
+      {/* Vedic Wisdom Slogan Section at the Top */}
+      <div className="w-full text-center py-2 select-none space-y-1">
+        <p className="text-lg md:text-xl font-bold text-violet-600 dark:text-violet-400 tracking-wide font-serif">
+          दुर्लभान्यपि कार्याणि सिध्यन्ति प्रोद्यमेन हि।
+        </p>
+        <p className="text-xs md:text-sm font-semibold text-muted-foreground italic">
+          "Impossible tasks can be accomplished through effort."
         </p>
       </div>
 
@@ -88,11 +102,11 @@ export default function StudentDashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Ongoing Courses Section */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2 select-none">
                 <BookOpen className="h-4.5 w-4.5 text-violet-500" />
-                Ongoing Courses
+                Ongoing Course
               </h2>
               {courses.length > 0 && (
                 <Link
@@ -108,8 +122,7 @@ export default function StudentDashboardPage() {
             {/* Courses Content */}
             {isLoadingCourses ? (
               <div className="space-y-3">
-                <Skeleton className="h-16 w-full rounded-xl" />
-                <Skeleton className="h-16 w-full rounded-xl" />
+                <Skeleton className="h-32 w-full rounded-xl" />
               </div>
             ) : courses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-border rounded-xl p-4">
@@ -120,36 +133,54 @@ export default function StudentDashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {courses.slice(0, 4).map((course) => (
+              <div className="space-y-4">
+                {courses.slice(0, 1).map((course) => (
                   <div
                     key={course.courseId}
-                    className="group border border-border/80 bg-muted/15 dark:bg-slate-900/10 hover:border-violet-500/30 rounded-xl p-4 transition-all duration-200 flex flex-col justify-between gap-4"
+                    className="relative overflow-hidden group border border-violet-100 dark:border-violet-950 bg-gradient-to-br from-violet-50/20 via-white to-violet-50/5 dark:from-violet-950/5 dark:via-slate-900/10 dark:to-transparent hover:border-violet-500/30 rounded-2xl p-5 md:p-6 transition-all duration-205 flex flex-col md:flex-row items-center justify-between gap-6"
                   >
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-widest bg-violet-500/5 px-2 py-0.5 rounded-full border border-violet-500/10">
-                        {course.examName}
-                      </span>
-                      <h3 className="text-xs font-extrabold text-foreground tracking-tight line-clamp-1 mt-1.5 group-hover:text-violet-500 transition-colors">
-                        {course.title}
-                      </h3>
-                      {course.description && (
-                        <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed mt-0.5">
-                          {course.description}
-                        </p>
-                      )}
+                    {/* Background blob/glow effect */}
+                    <div className="absolute right-0 top-0 -mt-12 -mr-12 w-48 h-48 rounded-full bg-violet-400/5 blur-3xl pointer-events-none group-hover:bg-violet-400/15 transition-all duration-300" />
+
+                    <div className="flex-1 space-y-4 w-full">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
+                          {course.examName}
+                        </span>
+                        <h3 className="text-base font-extrabold text-foreground tracking-tight line-clamp-1 mt-1.5 group-hover:text-violet-500 transition-colors">
+                          {course.title}
+                        </h3>
+                        {course.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mt-1">
+                            {course.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <Link href={`/dashboard/student/my-courses/${course.courseId}`} className="block w-full max-w-[160px]">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full justify-between font-bold text-xs rounded-lg h-9 px-4 cursor-pointer bg-violet-600 hover:bg-violet-750 text-white"
+                        >
+                          <span>Go to Classroom</span>
+                          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </Button>
+                      </Link>
                     </div>
 
-                    <Link href={`/dashboard/student/my-courses/${course.courseId}`} className="w-full">
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="w-full justify-between font-bold text-[10px] rounded-lg h-9 px-3 cursor-pointer group-hover:border-violet-500/25 group-hover:bg-violet-500/5 group-hover:text-violet-500"
-                      >
-                        <span>Go to Classroom</span>
-                        <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
-                      </Button>
-                    </Link>
+                    {/* Progress indicator with 3D Image Illustration */}
+                    <div className="flex items-center gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800/80 pt-5 md:pt-0 md:pl-6">
+                                 
+                      {/* Image illustration */}
+                      <div className="relative w-30 h-30 shrink-0 hidden sm:block">
+                        <img
+                          src="/course_progress_art.png"
+                          alt="Course Progress illustration"
+                          className="w-full h-full object-contain filter drop-shadow-md select-none pointer-events-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -157,7 +188,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Doubt Desk (Recent Doubts) Section */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2 select-none">
                 <HelpCircle className="h-4.5 w-4.5 text-violet-500" />
@@ -195,14 +226,19 @@ export default function StudentDashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {doubts.map((doubt) => (
                   <Link
                     key={doubt.id}
                     href={`/dashboard/student/doubts/${doubt.id}`}
-                    className="block group border border-border/70 hover:border-violet-500/25 bg-muted/10 hover:bg-violet-500/5/5 rounded-xl p-3.5 transition-all duration-200"
+                    className="block group border border-border/70 hover:border-violet-500/25 bg-muted/5 dark:bg-slate-900/10 hover:bg-violet-500/5 rounded-xl p-4 transition-all duration-200"
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4">
+                      {/* Soft icon wrapper on left */}
+                      <div className="p-3 bg-violet-100/60 text-violet-600 dark:bg-violet-950 dark:text-violet-400 rounded-xl shrink-0 group-hover:bg-violet-200/50 group-hover:text-violet-750 transition-colors">
+                        <HelpCircle className="h-5 w-5" />
+                      </div>
+
                       <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
                           <span className="bg-muted px-1.5 py-0.5 rounded border border-border text-slate-500 font-semibold select-none">
@@ -223,7 +259,11 @@ export default function StudentDashboardPage() {
                         <h4 className="text-xs font-extrabold text-foreground group-hover:text-violet-500 transition-colors truncate">
                           {doubt.title}
                         </h4>
+                        <p className="text-[11px] text-muted-foreground truncate leading-relaxed">
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        </p>
                       </div>
+
                       <div className="flex items-center gap-2 shrink-0 select-none">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider ${getDoubtStatusStyle(
@@ -247,7 +287,7 @@ export default function StudentDashboardPage() {
         <div className="space-y-6">
           
           {/* Upcoming Tests Section */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2 select-none">
                 <Calendar className="h-4.5 w-4.5 text-violet-500" />
@@ -268,7 +308,6 @@ export default function StudentDashboardPage() {
             {isLoadingTestSeries ? (
               <div className="space-y-3">
                 <Skeleton className="h-14 w-full rounded-xl" />
-                <Skeleton className="h-14 w-full rounded-xl" />
               </div>
             ) : testSeriesList.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-xl p-4">
@@ -279,30 +318,32 @@ export default function StudentDashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {testSeriesList.slice(0, 3).map((ts) => (
+              <div className="space-y-3">
+                {testSeriesList.slice(0, 1).map((ts) => (
                   <div
                     key={ts.testSeriesId}
-                    className="group border border-border/70 rounded-xl p-3.5 bg-muted/10 hover:border-violet-500/25 transition-all duration-200 space-y-3"
+                    className="group border border-border/70 rounded-2xl p-5 bg-muted/5 dark:bg-slate-900/10 hover:border-violet-500/25 transition-all duration-200 space-y-4"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-1 select-none">
+                      <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-2 select-none">
                         <span className="text-violet-500 font-semibold">{ts.examName}</span>
-                        <span className="text-slate-400 font-medium">Active</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-semibold bg-emerald-55 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400">ACTIVE</span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-foreground tracking-tight line-clamp-1">
+                      <h4 className="text-xs font-black text-foreground tracking-tight line-clamp-1">
                         {ts.name}
                       </h4>
                     </div>
+
+                    
 
                     <Link href={`/dashboard/student/my-test-series/${ts.testSeriesId}`} className="w-full block">
                       <Button
                         variant="outline"
                         size="xs"
-                        className="w-full justify-center gap-1.5 font-bold text-[10px] rounded-lg h-8 cursor-pointer group-hover:bg-violet-500 group-hover:text-white group-hover:border-violet-500 transition-colors"
+                        className="w-full justify-center gap-1.5 font-bold text-[10px] rounded-lg h-9 cursor-pointer border-violet-200 text-violet-600 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors"
                       >
                         <span>View Schedules</span>
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                     </Link>
                   </div>
@@ -312,7 +353,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Support Queries Section */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2 select-none">
                 <MessageSquare className="h-4.5 w-4.5 text-violet-500" />
@@ -331,7 +372,6 @@ export default function StudentDashboardPage() {
             {isLoadingQueries ? (
               <div className="space-y-3">
                 <Skeleton className="h-14 w-full rounded-xl" />
-                <Skeleton className="h-14 w-full rounded-xl" />
               </div>
             ) : queries.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-xl p-4">
@@ -348,31 +388,21 @@ export default function StudentDashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {queries.slice(0, 3).map((q) => (
+              <div className="space-y-3.5">
+                {queries.slice(0, 1).map((q) => (
                   <Link
                     key={q.id}
                     href="/dashboard/student/queries"
-                    className="block group border border-border/70 hover:border-violet-500/25 bg-muted/10 hover:bg-violet-500/5/5 rounded-xl p-3.5 transition-all duration-200"
+                    className="block group border border-border/70 hover:border-violet-500/25 bg-muted/5 dark:bg-slate-900/10 hover:bg-violet-500/5 rounded-xl p-4 transition-all duration-200"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 text-[9px] font-semibold text-muted-foreground">
-                          <span className="text-slate-400 select-none">
-                            {new Date(q.createdAt).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                            })}
-                          </span>
-                        </div>
-                        <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-violet-500 transition-colors truncate">
-                          {q.subject}
-                        </h4>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-relaxed">
-                          {q.message}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0 select-none">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[9px] font-semibold text-muted-foreground">
+                        <span className="text-slate-400 select-none">
+                          {new Date(q.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </span>
                         <span
                           className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider ${getQueryStatusStyle(
                             q.status
@@ -381,9 +411,25 @@ export default function StudentDashboardPage() {
                           {q.status === "RESPONDED" ? "responded" : "pending"}
                         </span>
                       </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-850 dark:text-slate-100 group-hover:text-violet-500 transition-colors truncate">
+                          {q.subject}
+                        </h4>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-relaxed mt-0.5">
+                          {q.message}
+                        </p>
+                      </div>
                     </div>
                   </Link>
                 ))}
+
+                <Link
+                  href="/dashboard/student/queries"
+                  className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-violet-500 hover:text-violet-600 pt-2 border-t border-slate-100 dark:border-slate-800/80 transition-colors"
+                >
+                  <span>View All Queries</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             )}
           </div>
@@ -391,6 +437,8 @@ export default function StudentDashboardPage() {
         </div>
 
       </div>
+
+
 
     </div>
   );
