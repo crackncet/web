@@ -91,6 +91,11 @@ export function AppSidebar() {
           title: "Queries",
           url: "/dashboard/student/queries",
           icon: MessageSquare,
+        },
+        {
+          title: "Billing & Access",
+          url: "/dashboard/student/billing",
+          icon: DollarSign,
         }
       ],
     },
