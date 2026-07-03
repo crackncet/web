@@ -21,7 +21,7 @@ export default function CoursesPage() {
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("date-asc");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [activeView, setActiveView] = useState<"grid" | "list">("grid");
+  const [activeView, setActiveView] = useState<"grid" | "list">("list");
 
   const examsList = useMemo(() => {
     return (examsData || []).map((e) => e.name);
