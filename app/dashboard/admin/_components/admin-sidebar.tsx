@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronUp,
   Group,
+  UserCheck,
 } from "lucide-react";
 
 import { useUser, useLogout } from "@/hooks/use-user";
@@ -78,6 +79,11 @@ export function AppSidebar() {
           title: "Teachers",
           url: "/dashboard/admin/teachers",
           icon: Group,
+        },
+        {
+          title: "Enrollments",
+          url: "/dashboard/admin/enrollments",
+          icon: UserCheck,
         }
       ],
     },
