@@ -11,6 +11,7 @@ export interface PublicTestSeriesListItem {
   isEnrollmentOpen: boolean;
   streamName: string[];
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
+  isFeatured?: boolean;
 }
 
 export interface ListPublicTestSeriesResponse {

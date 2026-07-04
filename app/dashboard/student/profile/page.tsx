@@ -1,12 +1,12 @@
 "use client";
 
-import { MemberHeader } from "../layout";
+import { StudentHeader } from "../layout";
 import { ProfileView } from "@/components/profile/ProfileView";
 
-export default function ProfilePage() {
+export default function StudentProfilePage() {
   return (
     <div className="space-y-6">
-      <MemberHeader>
+      <StudentHeader>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider select-none">
             <span>SETTINGS</span>
@@ -17,7 +17,7 @@ export default function ProfilePage() {
             My Profile
           </h1>
         </div>
-      </MemberHeader>
+      </StudentHeader>
 
       <ProfileView />
     </div>

@@ -78,6 +78,10 @@ export default function CoursesPage() {
 
     // Sorting
     result.sort((a, b) => {
+      // Featured ones always come first
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+
       if (sortBy === "date-asc") {
         const da = a.startDate ? new Date(a.startDate).getTime() : Infinity;
         const db = b.startDate ? new Date(b.startDate).getTime() : Infinity;

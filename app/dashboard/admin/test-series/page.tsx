@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AdminHeader } from "../layout";
-import { useAdminTestSeriesQuery } from "./_queries/test-series.queries";
+import { useAdminTestSeriesQuery, useFeaturedTestSeriesQuery } from "./_queries/test-series.queries";
 import { useExamsQuery } from "../metadata/_queries/exams.queries";
 import {
   Search,
@@ -10,6 +10,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export default function TestSeriesAdminPage() {
 
   // Queries
   const { data: exams } = useExamsQuery({ isActive: true });
+  const { data: featuredTestSeriesData, isLoading: isFeaturedLoading } = useFeaturedTestSeriesQuery();
   const { data: responseData, isLoading: isTestSeriesLoading, isPlaceholderData } = useAdminTestSeriesQuery({
     page,
     limit,
@@ -53,6 +55,7 @@ export default function TestSeriesAdminPage() {
     status: (selectedStatus as any) || undefined,
   });
 
+  const featuredTestSeriesList = featuredTestSeriesData?.data || [];
   const testSeriesList = responseData?.data || [];
   const meta = responseData?.meta || {
     page: 1,
@@ -105,6 +108,65 @@ export default function TestSeriesAdminPage() {
           <CreateTestSeriesDialog />
         </div>
       </AdminHeader>
+
+      {/* Featured Test Series Section */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 select-none">
+          <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+          <h2 className="text-sm font-bold tracking-tight text-foreground">Featured Test Series</h2>
+          <span className="text-[10px] font-semibold text-muted-foreground/60 px-1.5 py-0.5 rounded-md bg-muted uppercase tracking-wider">
+            {featuredTestSeriesList.length}
+          </span>
+        </div>
+
+        {isFeaturedLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <Card key={idx} className="overflow-hidden border border-amber-250/30 dark:border-amber-900/20 bg-amber-50/5 dark:bg-amber-955/5 flex flex-col h-full animate-pulse">
+                <Skeleton className="aspect-video w-full rounded-none bg-muted/60" />
+                <CardContent className="p-4 space-y-3">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : featuredTestSeriesList.length === 0 ? (
+          <Card className="border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-900/10 p-5 text-center select-none rounded-xl">
+            <p className="text-xs text-muted-foreground">
+              No featured test series. Star mark any active, published test series below to showcase it.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredTestSeriesList.map((fts) => {
+              const fullTS = testSeriesList.find((ts) => ts.id === fts.id) || {
+                ...fts,
+                examId: fts.id, // fallback
+                startDate: fts.startDate,
+                endDate: fts.startDate, // fallback
+                status: "ONGOING" as const,
+                isActive: true,
+                isPublished: true,
+                isEnrollmentOpen: true,
+                isFeatured: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                streams: fts.streams || [],
+                streamIds: [],
+              };
+              return (
+                <AdminTestSeriesCard
+                  key={fts.id}
+                  testSeries={fullTS}
+                  examName={fts.examName}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Filter Toolbar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 select-none">

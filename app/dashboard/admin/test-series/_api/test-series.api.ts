@@ -16,6 +16,7 @@ export interface TestSeries {
   createdAt: string;
   updatedAt: string;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
+  isFeatured?: boolean;
   streams?: string[];
   streamIds?: string[];
 }
@@ -165,6 +166,38 @@ export interface TestSubject {
 export async function getAdminTestSubjects(testSeriesId: string, testId: string) {
   const response = await apiClient.get<ApiSuccessResponse<TestSubject[]>>(
     `/test-series/${testSeriesId}/tests/${testId}/subjects`
+  );
+  return response.data;
+}
+
+export interface FeaturedTestSeries {
+  id: string;
+  examName: string;
+  name: string;
+  description: string | null;
+  banner: string | null;
+  price: string;
+  startDate: string | null;
+  streams?: string[];
+}
+
+export async function featureTestSeries(testSeriesId: string) {
+  const response = await apiClient.post<ApiSuccessResponse<{ testSeriesId: string; featured: boolean }>>(
+    `/test-series/${testSeriesId}/featured`
+  );
+  return response.data;
+}
+
+export async function unfeatureTestSeries(testSeriesId: string) {
+  const response = await apiClient.delete<ApiSuccessResponse<{ testSeriesId: string; featured: boolean }>>(
+    `/test-series/${testSeriesId}/featured`
+  );
+  return response.data;
+}
+
+export async function getFeaturedTestSeries() {
+  const response = await apiClient.get<ApiSuccessResponse<FeaturedTestSeries[]>>(
+    "/test-series/featured"
   );
   return response.data;
 }

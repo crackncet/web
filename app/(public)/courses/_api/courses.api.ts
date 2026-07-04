@@ -11,6 +11,7 @@ export interface PublicCourseListItem {
   isEnrollmentOpen: boolean;
   streamName: string[];
   status: "UPCOMING" | "ONGOING";
+  isFeatured?: boolean;
 }
 
 export interface ListPublicCoursesResponse {

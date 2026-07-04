@@ -67,6 +67,12 @@ const getInitials = (name?: string) => {
   return parts[0][0].toUpperCase();
 };
 
+const getProfileLink = (role?: string) => {
+  if (role === "ADMIN") return "/dashboard/admin/profile";
+  if (role === "TEAM_MEMBER") return "/dashboard/member/profile";
+  return "/dashboard/student/profile";
+};
+
 // ─── Desktop Auth Section ──────────────────────────────────────────────────
 function AuthSection() {
   const { data: user, isLoading } = useUser();
@@ -96,7 +102,7 @@ function AuthSection() {
           <Button 
             variant="ghost" 
             size="default" 
-            className="border border-violet-200 dark:border-violet-850 hover:border-violet-500 text-violet-650 dark:text-violet-400 bg-transparent hover:bg-violet-50/50 dark:hover:bg-violet-950/20 font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center gap-2 h-9 px-4 cursor-pointer transition-all shadow-2xs"
+            className="border border-violet-200 dark:border-violet-850 hover:border-violet-500 text-violet-650 dark:text-violet-400 bg-transparent hover:bg-violet-50/50 dark:hover:bg-violet-955/20 font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center gap-2 h-9 px-4 cursor-pointer transition-all shadow-2xs"
           >
             <LayoutDashboard className="h-4 w-4" />
             <span>Dashboard</span>
@@ -106,7 +112,7 @@ function AuthSection() {
         {/* Profile Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 p-1 pr-2 rounded-full border border-slate-200 dark:border-slate-800 hover:border-violet-500 dark:hover:border-violet-450 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-850 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-violet-500">
+            <button className="flex items-center gap-2 p-1 pr-2 rounded-full border border-slate-200 dark:border-slate-800 hover:border-violet-500 dark:hover:border-violet-450 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-855 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-violet-500">
               <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-650 flex items-center justify-center text-white text-xs font-black shadow-inner select-none">
                 {getInitials(user.fullName)}
               </div>
@@ -120,7 +126,7 @@ function AuthSection() {
             <DropdownMenuLabel className="font-semibold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider p-2 select-none">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="my-1 border-t border-slate-100 dark:border-slate-850" />
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-slate-705 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-all">
+              <Link href={getProfileLink(user.globalRole)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-slate-705 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-all">
                 <User className="h-4 w-4" />
                 <span>My Profile</span>
               </Link>
@@ -237,7 +243,7 @@ function MobileNav() {
                   {user.fullName}
                 </span>
                 <Link
-                  href="/profile"
+                  href={getProfileLink(user.globalRole)}
                   onClick={() => setOpen(false)}
                   className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline"
                 >

@@ -230,7 +230,7 @@ export function AppSidebar() {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/admin/profile" className="flex items-center gap-2 w-full cursor-pointer">
+                  <Link href="/dashboard/student/profile" className="flex items-center gap-2 w-full cursor-pointer">
                     <User className="h-4 w-4 text-slate-500" />
                     <span>My Profile</span>
                   </Link>

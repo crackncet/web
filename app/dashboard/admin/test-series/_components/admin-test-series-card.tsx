@@ -3,9 +3,10 @@
 import React from "react";
 import { TestSeries } from "../_api/test-series.api";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Tag, Sparkles, Pencil } from "lucide-react";
+import { Calendar, Tag, Sparkles, Pencil, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditTestSeriesDialog } from "./edit-test-series-dialog";
+import { useFeatureTestSeriesMutation, useUnfeatureTestSeriesMutation } from "../_queries/test-series.queries";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -25,6 +26,22 @@ export function AdminTestSeriesCard({ testSeries, examName }: AdminTestSeriesCar
         year: "numeric",
       })}`
     : "No Schedule Defined";
+
+  const featureMutation = useFeatureTestSeriesMutation();
+  const unfeatureMutation = useUnfeatureTestSeriesMutation();
+
+  const handleToggleFeature = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (testSeries.isFeatured) {
+      unfeatureMutation.mutate(testSeries.id);
+    } else {
+      featureMutation.mutate(testSeries.id);
+    }
+  };
+
+  const isPending = featureMutation.isPending || unfeatureMutation.isPending;
 
   // Active status shadow and motion configuration
   const shadowClass = testSeries.isActive
@@ -60,6 +77,25 @@ export function AdminTestSeriesCard({ testSeries, examName }: AdminTestSeriesCar
               {testSeries.status}
             </span>
           </div>
+
+          {/* Star Feature Button on Image */}
+          <button
+            type="button"
+            onClick={handleToggleFeature}
+            disabled={isPending}
+            className={`absolute top-2.5 right-2.5 p-1.5 rounded-full border shadow-sm backdrop-blur-md transition-all duration-300 cursor-pointer z-10 ${
+              testSeries.isFeatured
+                ? "bg-amber-500 border-amber-500 text-white hover:bg-amber-600 hover:border-amber-600 scale-105"
+                : "bg-white/85 border-slate-200/50 hover:bg-white text-slate-700 hover:text-amber-500 hover:scale-105"
+            }`}
+            title={testSeries.isFeatured ? "Unfeature Test Series" : "Feature Test Series"}
+          >
+            {isPending ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Star className={`h-3 w-3 ${testSeries.isFeatured ? "fill-current" : ""}`} />
+            )}
+          </button>
         </div>
       </div>
 

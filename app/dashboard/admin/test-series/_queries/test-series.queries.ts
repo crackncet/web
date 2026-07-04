@@ -11,6 +11,9 @@ import {
   addTestSeriesTests,
   CreateTestsInput,
   getAdminTestSubjects,
+  getFeaturedTestSeries,
+  featureTestSeries,
+  unfeatureTestSeries,
 } from "../_api/test-series.api";
 import { toast } from "sonner";
 
@@ -103,6 +106,48 @@ export function useAdminTestSubjectsQuery(testSeriesId: string, testId: string) 
     queryFn: () => getAdminTestSubjects(testSeriesId, testId),
     enabled: !!testSeriesId && !!testId,
     staleTime: 5000,
+  });
+}
+
+export function useFeaturedTestSeriesQuery() {
+  return useQuery({
+    queryKey: ["featuredTestSeries"],
+    queryFn: () => getFeaturedTestSeries(),
+    staleTime: 10000,
+  });
+}
+
+export function useFeatureTestSeriesMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (testSeriesId: string) => featureTestSeries(testSeriesId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: TEST_SERIES_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ["featuredTestSeries"] });
+      toast.success(res.message || "Test series featured successfully");
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error.message || "Failed to feature test series";
+      toast.error(message);
+    },
+  });
+}
+
+export function useUnfeatureTestSeriesMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (testSeriesId: string) => unfeatureTestSeries(testSeriesId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: TEST_SERIES_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ["featuredTestSeries"] });
+      toast.success(res.message || "Test series removed from featured list");
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error.message || "Failed to unfeature test series";
+      toast.error(message);
+    },
   });
 }
 
