@@ -61,3 +61,57 @@ export async function toggleCouponActive(couponId: string) {
   );
   return response.data;
 }
+
+export interface UpdateCouponInput {
+  minOrderAmount?: string | null;
+  maxDiscountAmount?: string | null;
+  totalLimit?: number | null;
+  expiresAt?: string | null;
+  userId?: string | null;
+  applicableItems: ApplicableItemInput[];
+}
+
+export interface CouponUsageDetails {
+  id: string;
+  couponId: string;
+  couponCode: string;
+  studentId: string;
+  studentName: string | null;
+  studentEmail: string | null;
+  orderId: string;
+  discountApplied: string;
+  usedAt: string;
+}
+
+export interface CouponUsagesResponse {
+  usages: CouponUsageDetails[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export async function updateCoupon(couponId: string, data: UpdateCouponInput) {
+  const response = await apiClient.put<ApiSuccessResponse<CouponDetails>>(
+    `/payments/admin/coupons/${couponId}`,
+    data
+  );
+  return response.data;
+}
+
+export async function getCouponUsages(filters: { page: number; limit: number; query?: string }): Promise<CouponUsagesResponse> {
+  const params: Record<string, any> = {
+    page: filters.page,
+    limit: filters.limit,
+  };
+  if (filters.query?.trim()) {
+    params.query = filters.query.trim();
+  }
+  const response = await apiClient.get<ApiSuccessResponse<CouponUsagesResponse>>(
+    "/payments/admin/coupons/usages",
+    { params }
+  );
+  return response.data.data;
+}

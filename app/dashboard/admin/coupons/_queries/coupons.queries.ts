@@ -4,11 +4,15 @@ import {
   getCoupons,
   createCoupon,
   toggleCouponActive,
+  updateCoupon,
+  getCouponUsages,
   CreateCouponInput,
+  UpdateCouponInput,
 } from "../_api/coupons.api";
 
 export const COUPON_QUERY_KEYS = {
   all: ["adminCoupons"] as const,
+  usages: (filters: { page: number; limit: number; query?: string }) => [...COUPON_QUERY_KEYS.all, "usages", filters] as const,
 };
 
 export function useAdminCouponsQuery() {
@@ -35,6 +39,23 @@ export function useCreateCouponMutation() {
   });
 }
 
+export function useUpdateCouponMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ couponId, data }: { couponId: string; data: UpdateCouponInput }) =>
+      updateCoupon(couponId, data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: COUPON_QUERY_KEYS.all });
+      toast.success(res.message || "Coupon updated successfully");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || "Failed to update coupon";
+      toast.error(message);
+    },
+  });
+}
+
 export function useToggleCouponActiveMutation() {
   const queryClient = useQueryClient();
 
@@ -48,5 +69,14 @@ export function useToggleCouponActiveMutation() {
       const message = error.response?.data?.message || error.message || "Failed to toggle coupon status";
       toast.error(message);
     },
+  });
+}
+
+export function useCouponUsagesQuery(filters: { page: number; limit: number; query?: string }) {
+  return useQuery({
+    queryKey: COUPON_QUERY_KEYS.usages(filters),
+    queryFn: () => getCouponUsages(filters),
+    placeholderData: (previousData) => previousData,
+    staleTime: 5000,
   });
 }
