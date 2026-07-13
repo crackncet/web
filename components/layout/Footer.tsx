@@ -58,10 +58,10 @@ export default function Footer() {
             <div className="flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-3 text-sm text-slate-600 dark:text-slate-400">
               <Mail className="w-5 h-5 text-primary shrink-0" />
               <a
-                href="mailto:purushottamkr6321@gmail.com"
+                href="mailto:admin@crackncet.com"
                 className="font-semibold hover:text-primary transition-colors"
               >
-                purushottamkr6321@gmail.com
+                admin@crackncet.com
               </a>
             </div>
           </div>

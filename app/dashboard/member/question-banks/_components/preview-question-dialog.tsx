@@ -12,6 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+
 interface PreviewQuestionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -85,7 +87,7 @@ export function PreviewQuestionDialog({
             Review how the question card will look in the workspace with side-by-side translation and math formatting.
           </DialogDescription>
         </DialogHeader>
-
+ 
         {/* Renders the simulated card */}
         <div className="flex-1 my-4 space-y-4 overflow-y-auto pr-1">
           <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 space-y-4">
@@ -107,14 +109,18 @@ export function PreviewQuestionDialog({
             {/* Question Text Side-by-Side */}
             <div className={`grid grid-cols-1 ${hindiText.trim() ? "md:grid-cols-2 gap-6" : "block"} text-[12px] leading-relaxed text-slate-800 dark:text-slate-200`}>
               <div className="space-y-2">
-                <div className="whitespace-pre-wrap break-words katex-live-preview text-slate-700 dark:text-slate-300 font-medium">
-                  {originalText || <span className="text-slate-400 italic">Empty English question text...</span>}
+                <div className="katex-live-preview text-slate-700 dark:text-slate-300 font-medium">
+                  {originalText ? (
+                    <MarkdownRenderer text={originalText} />
+                  ) : (
+                    <span className="text-slate-400 italic">Empty English question text...</span>
+                  )}
                 </div>
               </div>
               {hindiText.trim() && (
                 <div className="space-y-2 md:border-l border-slate-200 dark:border-slate-800 md:pl-6">
-                  <div className="whitespace-pre-wrap break-words katex-live-preview text-slate-700 dark:text-slate-350 font-medium">
-                    {hindiText}
+                  <div className="katex-live-preview text-slate-700 dark:text-slate-350 font-medium">
+                    <MarkdownRenderer text={hindiText} />
                   </div>
                 </div>
               )}
@@ -143,12 +149,16 @@ export function PreviewQuestionDialog({
                     </span>
 
                     <div className={`flex-1 ${opt.hindiText?.trim() ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}`}>
-                      <div className="break-words katex-live-preview font-medium">
-                        {opt.originalText || <span className="text-slate-400 italic">Option {String.fromCharCode(65 + oIdx)} English...</span>}
+                      <div className="katex-live-preview font-medium text-[11px]">
+                        {opt.originalText ? (
+                          <MarkdownRenderer text={opt.originalText} />
+                        ) : (
+                          <span className="text-slate-400 italic">Option {String.fromCharCode(65 + oIdx)} English...</span>
+                        )}
                       </div>
                       {opt.hindiText?.trim() && (
-                        <div className="break-words md:border-l border-slate-200 dark:border-slate-800 md:pl-4 text-slate-505 dark:text-slate-400 katex-live-preview font-medium">
-                          {opt.hindiText}
+                        <div className="md:border-l border-slate-200 dark:border-slate-800 md:pl-4 text-slate-505 dark:text-slate-400 katex-live-preview font-medium text-[11px]">
+                          <MarkdownRenderer text={opt.hindiText} />
                         </div>
                       )}
                     </div>
@@ -182,14 +192,14 @@ export function PreviewQuestionDialog({
                 </div>
                 <div className={`grid grid-cols-1 ${solutionHindi.trim() ? "md:grid-cols-2 gap-6" : "block"} text-[11px] leading-relaxed text-slate-700 dark:text-slate-300`}>
                   <div className="space-y-1">
-                    <div className="whitespace-pre-wrap break-words katex-live-preview font-medium">
-                      {solutionOriginal}
+                    <div className="katex-live-preview font-medium">
+                      <MarkdownRenderer text={solutionOriginal} />
                     </div>
                   </div>
                   {solutionHindi.trim() && (
                     <div className="space-y-1 md:border-l border-slate-200 dark:border-slate-800 md:pl-6 font-medium">
-                      <div className="whitespace-pre-wrap break-words katex-live-preview">
-                        {solutionHindi}
+                      <div className="katex-live-preview">
+                        <MarkdownRenderer text={solutionHindi} />
                       </div>
                     </div>
                   )}

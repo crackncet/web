@@ -12,6 +12,7 @@ import {
   useReuseQuestion,
   useTranslateQuestions,
 } from "../_queries/question-banks.queries";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { toast } from "sonner";
 import { KeymanOskPanel } from "./virtual-keyboard";
 import { VisualMathTextEditor } from "./visual-math-text-editor";
@@ -505,15 +506,15 @@ export function CopyReuseQuestionDialog({
                 <div className={question.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-850 dark:text-slate-200" : "text-sm text-slate-850 dark:text-slate-200"}>
                   <div className="space-y-2">
                     <div className="font-bold text-[10px] uppercase text-slate-400 tracking-wider">English (Original)</div>
-                    <div className="whitespace-pre-wrap leading-relaxed break-words font-medium text-slate-700 dark:text-slate-300">
-                      {question.originalText}
+                    <div className="leading-relaxed break-words font-medium text-slate-700 dark:text-slate-300">
+                      <MarkdownRenderer text={question.originalText} />
                     </div>
                   </div>
                   {question.hindiText && (
                     <div className="space-y-2 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pt-4 md:pt-0 md:pl-6">
                       <div className="font-bold text-[10px] uppercase text-indigo-400 tracking-wider">Hindi (Translation)</div>
-                      <div className="whitespace-pre-wrap leading-relaxed break-words font-medium text-slate-700 dark:text-slate-300">
-                        {question.hindiText}
+                      <div className="leading-relaxed break-words font-medium text-slate-700 dark:text-slate-300">
+                        <MarkdownRenderer text={question.hindiText} />
                       </div>
                     </div>
                   )}
@@ -541,10 +542,12 @@ export function CopyReuseQuestionDialog({
                             {opt.isCorrect ? <Check className="h-3 w-3" /> : String.fromCharCode(65 + idx)}
                           </span>
                           <div className={opt.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-4 flex-1" : "flex-1"}>
-                            <div className="break-words font-medium leading-relaxed">{opt.originalText}</div>
+                            <div className="break-words font-medium leading-relaxed">
+                              <MarkdownRenderer text={opt.originalText} />
+                            </div>
                             {opt.hindiText && (
                               <div className="break-words font-medium leading-relaxed md:border-l border-slate-200 dark:border-slate-800 md:pl-4 text-slate-500">
-                                {opt.hindiText}
+                                <MarkdownRenderer text={opt.hindiText} />
                               </div>
                             )}
                           </div>
@@ -559,9 +562,13 @@ export function CopyReuseQuestionDialog({
                   <div className="p-4 border border-slate-100 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-900/30 rounded-lg text-xs space-y-2">
                     <div className="text-[10px] font-bold uppercase text-emerald-600 tracking-wider">Solution Explanation</div>
                     <div className={question.solution.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "block"}>
-                      <div className="whitespace-pre-wrap leading-relaxed text-slate-655 dark:text-slate-350">{question.solution.originalText}</div>
+                      <div className="leading-relaxed text-slate-655 dark:text-slate-350">
+                        <MarkdownRenderer text={question.solution.originalText} />
+                      </div>
                       {question.solution.hindiText && (
-                        <div className="whitespace-pre-wrap leading-relaxed text-slate-500 md:border-l border-slate-200 dark:border-slate-800 md:pl-6">{question.solution.hindiText}</div>
+                        <div className="leading-relaxed text-slate-500 md:border-l border-slate-200 dark:border-slate-800 md:pl-6">
+                          <MarkdownRenderer text={question.solution.hindiText} />
+                        </div>
                       )}
                     </div>
                   </div>

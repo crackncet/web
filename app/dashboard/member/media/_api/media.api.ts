@@ -70,6 +70,7 @@ export interface CreateVideoInput {
   name: string;
   subjectId: string;
   thumbnailKey: string;
+  videoKey: string;
   mimeType: string;
   sizeBytes: number;
   durationSeconds: number;

@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PracticeQuestion, PracticeOption } from "@/app/dashboard/student/my-courses/[courseId]/subjects/[courseSubjectId]/topics/[topicId]/practice/_api/practice.api";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 interface QuestionCardProps {
   question: PracticeQuestion;
@@ -56,29 +57,37 @@ export function QuestionCard({
   useEffect(() => {
     let active = true;
 
-    const loadAndRender = () => {
-      if (!active) return;
-      
-      const render = () => {
-        if (!containerRef.current) return;
-        try {
-          if ((window as any).renderMathInElement) {
-            (window as any).renderMathInElement(containerRef.current, {
-              delimiters: [
-                { left: "$$", right: "$$", display: true },
-                { left: "$", right: "$", display: false },
-              ],
-            });
-          }
-        } catch (err) {
-          console.error("KaTeX rendering error:", err);
-        } finally {
+    // Safety fallback: if scripts take too long or fail, show the question anyway
+    const fallbackTimeout = setTimeout(() => {
+      if (active) setMathReady(true);
+    }, 1000);
+
+    const render = () => {
+      if (!containerRef.current) return;
+      try {
+        if ((window as any).renderMathInElement) {
+          (window as any).renderMathInElement(containerRef.current, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false },
+            ],
+          });
+        }
+      } catch (err) {
+        console.error("KaTeX rendering error:", err);
+      } finally {
+        if (active) {
+          clearTimeout(fallbackTimeout);
           // Delay transition slightly to avoid flash of raw text
           setTimeout(() => {
             if (active) setMathReady(true);
           }, 80);
         }
-      };
+      }
+    };
+
+    const loadAndRender = () => {
+      if (!active) return;
 
       // Ensure CSS exists
       if (!document.getElementById("katex-css")) {
@@ -89,27 +98,53 @@ export function QuestionCard({
         document.head.appendChild(link);
       }
 
-      // Ensure JS exists
-      if (!(window as any).katex) {
-        if (!document.getElementById("katex-js")) {
-          const script = document.createElement("script");
-          script.id = "katex-js";
-          script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js";
-          script.onload = () => {
-            if (!document.getElementById("katex-auto-render-js")) {
-              const autoScript = document.createElement("script");
-              autoScript.id = "katex-auto-render-js";
-              autoScript.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js";
-              autoScript.onload = render;
-              document.head.appendChild(autoScript);
-            } else {
-              render();
-            }
-          };
-          document.head.appendChild(script);
+      // Check if both JS files are fully loaded
+      const isKatexLoaded = !!(window as any).katex;
+      const isAutoRenderLoaded = !!(window as any).renderMathInElement;
+
+      if (isKatexLoaded && isAutoRenderLoaded) {
+        render();
+        return;
+      }
+
+      // Helper to load auto-render script once main script is ready
+      const loadAutoRenderScript = () => {
+        if (!active) return;
+        
+        if ((window as any).renderMathInElement) {
+          render();
+          return;
+        }
+
+        const existingAutoScript = document.getElementById("katex-auto-render-js");
+        if (existingAutoScript) {
+          existingAutoScript.addEventListener("load", render);
+          // If it somehow loaded in between, trigger immediately
+          if ((window as any).renderMathInElement) {
+            render();
+          }
+        } else {
+          const autoScript = document.createElement("script");
+          autoScript.id = "katex-auto-render-js";
+          autoScript.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js";
+          autoScript.onload = render;
+          document.head.appendChild(autoScript);
+        }
+      };
+
+      const existingScript = document.getElementById("katex-js");
+      if (existingScript) {
+        existingScript.addEventListener("load", loadAutoRenderScript);
+        // If it loaded in the meantime, proceed
+        if ((window as any).katex) {
+          loadAutoRenderScript();
         }
       } else {
-        render();
+        const script = document.createElement("script");
+        script.id = "katex-js";
+        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js";
+        script.onload = loadAutoRenderScript;
+        document.head.appendChild(script);
       }
     };
 
@@ -117,8 +152,9 @@ export function QuestionCard({
 
     return () => {
       active = false;
+      clearTimeout(fallbackTimeout);
     };
-  }, [question.id, lang, mathReady]);
+  }, [question.id, lang]);
 
   // Determine text and image based on active language
   const questionText = lang === "hi" && question.hindiText ? question.hindiText : question.originalText;
@@ -255,8 +291,8 @@ export function QuestionCard({
         ) : (
           <>
             {/* Question text */}
-            <div className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
-              {questionText}
+            <div className="text-sm font-medium leading-relaxed">
+              <MarkdownRenderer text={questionText} />
             </div>
 
             {/* Question Image if present */}
@@ -311,8 +347,8 @@ export function QuestionCard({
                           className="shrink-0 h-4.5 w-4.5 border-muted-foreground/60 text-primary focus:ring-primary/40"
                         />
                         <div className="flex-1 space-y-1.5">
-                          <Label htmlFor={opt.id} className="text-xs font-medium cursor-pointer leading-tight">
-                            {optText}
+                          <Label htmlFor={opt.id} className="text-xs font-medium cursor-pointer leading-tight block">
+                            <MarkdownRenderer text={optText} className="text-xs font-medium cursor-pointer inline" />
                           </Label>
                           {optImg && (
                             <img
@@ -358,8 +394,8 @@ export function QuestionCard({
                           className="shrink-0 h-4.5 w-4.5 border-muted-foreground/60 rounded focus:ring-primary/40"
                         />
                         <div className="flex-1 space-y-1.5">
-                          <Label htmlFor={opt.id} className="text-xs font-medium cursor-pointer leading-tight">
-                            {optText}
+                          <Label htmlFor={opt.id} className="text-xs font-medium cursor-pointer leading-tight block">
+                            <MarkdownRenderer text={optText} className="text-xs font-medium cursor-pointer inline" />
                           </Label>
                           {optImg && (
                             <img
@@ -468,10 +504,14 @@ export function QuestionCard({
                   <HelpCircle className="h-4 w-4 text-primary" />
                   <span>Explanation & Solution</span>
                 </h4>
-                <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
-                  {lang === "hi" && question.solution.hindiText
-                    ? question.solution.hindiText
-                    : question.solution.originalText}
+                <div className="text-xs md:text-sm leading-relaxed">
+                  <MarkdownRenderer
+                    text={
+                      lang === "hi" && question.solution.hindiText
+                        ? question.solution.hindiText
+                        : question.solution.originalText
+                    }
+                  />
                 </div>
                 {(lang === "hi" && question.solution.hindiImage
                   ? question.solution.hindiImage

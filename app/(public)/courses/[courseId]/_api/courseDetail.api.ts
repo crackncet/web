@@ -56,7 +56,17 @@ export async function getPublicCourseDetail(courseId: string): Promise<PublicCou
   const response = await apiClient.get<ApiSuccessResponse<PublicCourseDetail>>(
     `/courses/public/${courseId}`
   );
-  return response.data.data;
+  const data = response.data.data;
+  if (data && data.testSeriesId) {
+    const coursePriceNum = parseFloat(data.price) || 0;
+    const testSeriesPriceNum = parseFloat(data.testSeriesPrice || "0") || 0;
+    return {
+      ...data,
+      price: (coursePriceNum + testSeriesPriceNum).toString(),
+      testSeriesPrice: "0",
+    };
+  }
+  return data;
 }
 
 export async function getPublicCourseMentors(courseId: string): Promise<PublicStreamMentors[]> {

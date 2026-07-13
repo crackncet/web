@@ -79,21 +79,32 @@ export function UploadVideoDialog({ subjects }: UploadVideoDialogProps) {
       video.onseeked = () => {
         try {
           const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 360;
+          let width = video.videoWidth || 640;
+          let height = video.videoHeight || 360;
+
+          // Limit resolution to a maximum width of 1280px to save storage/bandwidth
+          const MAX_WIDTH = 1280;
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
           const ctx = canvas.getContext("2d");
           if (ctx) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Convert to JPEG with 0.82 quality to guarantee compression under 5MB
             canvas.toBlob((blob) => {
               URL.revokeObjectURL(objectUrl);
               if (blob) {
-                const frameFile = new File([blob], "auto-thumbnail.png", { type: "image/png" });
+                const frameFile = new File([blob], "auto-thumbnail.jpg", { type: "image/jpeg" });
                 const previewUrl = URL.createObjectURL(blob);
                 resolve({ file: frameFile, url: previewUrl });
               } else {
                 resolve(null);
               }
-            }, "image/png");
+            }, "image/jpeg", 0.82);
           } else {
             URL.revokeObjectURL(objectUrl);
             resolve(null);
@@ -213,6 +224,7 @@ export function UploadVideoDialog({ subjects }: UploadVideoDialogProps) {
         name: name.trim(),
         subjectId,
         thumbnailKey: finalThumbnailKey,
+        videoKey: videoUpload.fileKey,
         mimeType: videoFile.type || "video/mp4",
         sizeBytes: videoFile.size,
         durationSeconds: duration || 1,

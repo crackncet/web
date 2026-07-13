@@ -12,6 +12,8 @@ export interface PublicCourseListItem {
   streamName: string[];
   status: "UPCOMING" | "ONGOING";
   isFeatured?: boolean;
+  testSeriesId?: string | null;
+  testSeriesPrice?: string | null;
 }
 
 export interface ListPublicCoursesResponse {
@@ -27,8 +29,20 @@ export async function getPublicCourses(params: { page?: number; limit?: number; 
     "/courses/public",
     { params }
   );
+  const data = response.data.data.map((item) => {
+    if (item.testSeriesId) {
+      const coursePriceNum = parseFloat(item.price) || 0;
+      const testSeriesPriceNum = parseFloat(item.testSeriesPrice || "0") || 0;
+      return {
+        ...item,
+        price: (coursePriceNum + testSeriesPriceNum).toString(),
+        testSeriesPrice: "0",
+      };
+    }
+    return item;
+  });
   return {
-    data: response.data.data,
+    data,
     total: response.data.meta?.total || 0,
     page: response.data.meta?.page || 1,
     limit: response.data.meta?.limit || 20,

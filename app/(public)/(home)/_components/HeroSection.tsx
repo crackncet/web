@@ -257,17 +257,33 @@ export default function HeroSection() {
             with modern test patterns, chapter materials, and interactive support.
           </p>
 
-          {/* CTA Button with Wireframe Offset shadow effect */}
-          <div className="relative group mb-12">
-            <div className="absolute inset-0 bg-primary/15 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
-            <Link href="/courses">
-              <button
-                className="relative flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
-              >
-                <span>Explore Courses</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-              </button>
-            </Link>
+          {/* CTA Buttons with Wireframe Offset shadow effect */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 mb-12 w-full justify-center">
+            {/* Primary CTA: Explore Courses */}
+            <div className="relative group w-full sm:w-auto">
+              <div className="absolute inset-0 bg-primary/15 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
+              <Link href="/courses" className="block w-full">
+                <button
+                  className="relative w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
+                >
+                  <span>Explore Courses</span>
+                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </button>
+              </Link>
+            </div>
+
+            {/* Secondary CTA: Try Mock Test */}
+            <div className="relative group w-full sm:w-auto">
+              <div className="absolute inset-0 bg-emerald-500/10 rounded-xl border-2 border-slate-900 dark:border-slate-100 translate-x-1.5 translate-y-1.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 pointer-events-none" />
+              <Link href="/sample-test" className="block w-full">
+                <button
+                  className="relative w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-card text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 font-black text-sm uppercase border-2 border-slate-900 dark:border-slate-100 rounded-xl transition-all duration-200 cursor-pointer"
+                >
+                  <span>Try Free Mock Test</span>
+                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

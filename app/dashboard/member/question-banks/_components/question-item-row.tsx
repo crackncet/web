@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { EditQuestionDialog } from "./edit-question-dialog";
 import { CopyReuseQuestionDialog } from "./copy-reuse-dialog";
 
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+
 interface QuestionItemRowProps {
   question: any;
   index: number;
@@ -98,8 +100,8 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, rea
       <div className={question.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-800 dark:text-slate-200" : "text-sm text-slate-800 dark:text-slate-200"}>
         {/* English (Original) column */}
         <div className="space-y-3">
-          <div className="whitespace-pre-wrap leading-relaxed break-words text-slate-700 dark:text-slate-355">
-            {question.originalText}
+          <div className="leading-relaxed break-words text-slate-700 dark:text-slate-355">
+            <MarkdownRenderer text={question.originalText} />
           </div>
           {question.originalImage && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -114,8 +116,8 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, rea
         {/* Hindi column (only if present) */}
         {question.hindiText && (
           <div className="space-y-3 border-l border-slate-200 dark:border-slate-800 pl-6">
-            <div className="whitespace-pre-wrap leading-relaxed break-words text-slate-700 dark:text-slate-355">
-              {question.hindiText}
+            <div className="leading-relaxed break-words text-slate-700 dark:text-slate-355">
+              <MarkdownRenderer text={question.hindiText} />
             </div>
             {question.hindiImage && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -167,10 +169,12 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, rea
                     </span>
                     
                     <div className={`flex-1 ${opt.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}`}>
-                      <div className="break-words font-medium leading-relaxed">{opt.originalText}</div>
+                      <div className="break-words font-medium leading-relaxed">
+                        <MarkdownRenderer text={opt.originalText} />
+                      </div>
                       {opt.hindiText && (
                         <div className="break-words font-medium leading-relaxed md:border-l border-slate-200 dark:border-slate-800 md:pl-4 text-slate-500 dark:text-slate-400">
-                          {opt.hindiText}
+                          <MarkdownRenderer text={opt.hindiText} />
                         </div>
                       )}
                     </div>
@@ -218,7 +222,9 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, rea
               </div>
               <div className={question.solution.hindiText ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "block"}>
                 <div className="space-y-3">
-                  <div className="whitespace-pre-wrap leading-relaxed break-words">{question.solution.originalText}</div>
+                  <div className="leading-relaxed break-words">
+                    <MarkdownRenderer text={question.solution.originalText} />
+                  </div>
                   {question.solution.originalImage && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -230,7 +236,9 @@ export function QuestionItemRow({ question, index, bankId, onUpdateInMemory, rea
                 </div>
                 {question.solution.hindiText && (
                   <div className="space-y-3 border-l border-slate-200 dark:border-slate-800 pl-6">
-                    <div className="whitespace-pre-wrap leading-relaxed break-words">{question.solution.hindiText}</div>
+                    <div className="leading-relaxed break-words">
+                      <MarkdownRenderer text={question.solution.hindiText} />
+                    </div>
                     {question.solution.hindiImage && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img

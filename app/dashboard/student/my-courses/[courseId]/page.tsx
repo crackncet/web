@@ -94,13 +94,7 @@ export default function StudentCourseDetailPage() {
         {/* Success Content */}
         {!isLoading && !isError && syllabus && (
           <>
-            {/* Performance Analytics Section */}
-            <CourseAnalyticsPlaceholder
-              overallProgressPercentage={syllabus.overallProgressPercentage}
-              stats={syllabus.stats}
-            />
-
-            
+                       
             {/* Course Summary Banner */}
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
               <div className="relative aspect-video w-full sm:w-[32%] shrink-0 overflow-hidden rounded-xl bg-muted border border-border/40 shadow-xs">
@@ -132,6 +126,12 @@ export default function StudentCourseDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Performance Analytics Section */}
+            <CourseAnalyticsPlaceholder
+              overallProgressPercentage={syllabus.overallProgressPercentage}
+              stats={syllabus.stats}
+            />
 
             {/* Subjects Grid Section */}
             {syllabus.subjects.length === 0 ? (
