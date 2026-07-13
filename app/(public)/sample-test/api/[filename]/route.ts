@@ -13,7 +13,7 @@ export async function GET(
   if (filename.includes("..") || filename.includes("/")) {
     return new NextResponse("Invalid file path", { status: 400 });
   }
-
+  
   try {
     const filePath = path.join(
       process.cwd(),
