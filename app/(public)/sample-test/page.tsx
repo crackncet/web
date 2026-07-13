@@ -371,7 +371,7 @@ export default function PublicSampleTestPage() {
       if (testMode === "TEST") {
         // Load all 8 subject papers in parallel
         const promises = SUBJECTS.map(async (subj) => {
-          const res = await fetch(`/test-papers/${subj.filename}`);
+          const res = await fetch(`/sample-test/api/${subj.filename}`);
           const markdown = await res.text();
           return {
             subject: subj,
@@ -420,9 +420,8 @@ export default function PublicSampleTestPage() {
         setTimeLeft(120 * 60); // 120 minutes full duration
         setGameState("TESTING");
       } else {
-        // Practice Mode: Single subject
         if (!selectedSubject) return;
-        const res = await fetch(`/test-papers/${selectedSubject.filename}`);
+        const res = await fetch(`/sample-test/api/${selectedSubject.filename}`);
         const markdown = await res.text();
         const parsed = parseMarkdownToQuestions(markdown);
 
@@ -454,7 +453,7 @@ export default function PublicSampleTestPage() {
       }
     } catch (err) {
       console.error("Failed to start CBT session", err);
-      alert("Failed to load test papers. Please verify that the files are present in web/public/test-papers/");
+      alert("Failed to load test papers. Please verify that the files are present in app/(public)/sample-test/_papers/");
     } finally {
       setLoading(false);
     }
