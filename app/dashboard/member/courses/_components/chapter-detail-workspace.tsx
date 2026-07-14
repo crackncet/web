@@ -43,6 +43,7 @@ interface ChapterDetailWorkspaceProps {
   courseSubjectId: string;
   chapterId: string;
   isAssignedTeacher: boolean;
+  isAdmin?: boolean;
 }
 
 export default function ChapterDetailWorkspace({
@@ -50,7 +51,10 @@ export default function ChapterDetailWorkspace({
   courseSubjectId,
   chapterId,
   isAssignedTeacher,
+  isAdmin = false,
 }: ChapterDetailWorkspaceProps) {
+  const dashboardPath = isAdmin ? "/dashboard/admin" : "/dashboard/member";
+
   // Subject Detail Query to retrieve global subjectId (runs in background, cached)
   const { data: subjectResponse } = useSubjectDetailQuery(courseId, courseSubjectId);
   const subjectId = subjectResponse?.data?.subjectId || "";
@@ -488,7 +492,7 @@ export default function ChapterDetailWorkspace({
                   </div>
                 </div>
                 {chapterData.notesAssetId && (
-                  <Link href={`/dashboard/member/media/${chapterData.notesAssetId}/view`}>
+                  <Link href={`${dashboardPath}/media/${chapterData.notesAssetId}/view`}>
                     <Button size="icon-xs" variant="ghost" className="h-5 w-5 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Note">
                       <Eye className="h-3 w-3 text-slate-500" />
                     </Button>
@@ -507,7 +511,7 @@ export default function ChapterDetailWorkspace({
                   </div>
                 </div>
                 {chapterData.chapterPracticeBankId && (
-                  <Link href={`/dashboard/member/question-banks/${chapterData.chapterPracticeBankId}/view`}>
+                  <Link href={`${dashboardPath}/question-banks/${chapterData.chapterPracticeBankId}/view`}>
                     <Button size="icon-xs" variant="ghost" className="h-5 w-5 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Practice Bank">
                       <Eye className="h-3 w-3 text-slate-500" />
                     </Button>
@@ -816,7 +820,7 @@ export default function ChapterDetailWorkspace({
                         </div>
                       </div>
                       {topicDetail.videoLectureId && (
-                        <Link href={`/dashboard/member/media/${topicDetail.videoLectureId}/view`}>
+                        <Link href={`${dashboardPath}/media/${topicDetail.videoLectureId}/view`}>
                           <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Video">
                             <Eye className="h-3.5 w-3.5 text-slate-500" />
                           </Button>
@@ -845,7 +849,7 @@ export default function ChapterDetailWorkspace({
                         </div>
                       </div>
                       {topicDetail.notesAssetId && (
-                        <Link href={`/dashboard/member/media/${topicDetail.notesAssetId}/view`}>
+                        <Link href={`${dashboardPath}/media/${topicDetail.notesAssetId}/view`}>
                           <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View Note">
                             <Eye className="h-3.5 w-3.5 text-slate-500" />
                           </Button>
@@ -864,7 +868,7 @@ export default function ChapterDetailWorkspace({
                         </div>
                       </div>
                       {topicDetail.dppBankId && (
-                        <Link href={`/dashboard/member/question-banks/${topicDetail.dppBankId}/view`}>
+                        <Link href={`${dashboardPath}/question-banks/${topicDetail.dppBankId}/view`}>
                           <Button size="icon-xs" variant="ghost" className="h-6 w-6 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 cursor-pointer" title="View DPP">
                             <Eye className="h-3.5 w-3.5 text-slate-500" />
                           </Button>

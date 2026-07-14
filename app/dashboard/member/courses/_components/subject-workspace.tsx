@@ -324,6 +324,7 @@ export default function SubjectWorkspace({
                   courseSubjectId={courseSubjectId}
                   chapterId={selectedChapter.id}
                   isAssignedTeacher={isAssignedTeacher}
+                  isAdmin={isAdmin}
                 />
               ) : (
                 <div className="p-4 md:p-5 flex-grow flex flex-col items-center justify-center text-center text-muted-foreground gap-2">
@@ -350,6 +351,7 @@ export default function SubjectWorkspace({
                 courseSubjectId={courseSubjectId}
                 chapterId={selectedChapter.id}
                 isAssignedTeacher={isAssignedTeacher}
+                isAdmin={isAdmin}
               />
             </div>
           )}

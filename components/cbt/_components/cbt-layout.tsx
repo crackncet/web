@@ -88,7 +88,7 @@ export function CbtLayout({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background w-screen h-screen flex flex-col select-none overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-background w-screen h-screen h-[100dvh] flex flex-col select-none overflow-hidden">
       {/* 1. Header Bar */}
       <header className="h-14 md:h-16 border-b border-border/60 bg-card px-4 md:px-6 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
