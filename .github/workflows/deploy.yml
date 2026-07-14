@@ -1,96 +1,24 @@
-name: Frontend Multi-Environment Deploy
+name: Frontend Production Deploy
 
 on:
   push:
     branches:
-      - development
       - main
 
 jobs:
-  # ────────────────────────────────────────────────────────
-  # STAGE 1: BUILD & PUSH IMAGE TO GITHUB CONTAINER REGISTRY
-  # ────────────────────────────────────────────────────────
-  build-and-push:
-    name: Build & Push Frontend Image
+  deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set Environment variables for tagging
-        id: vars
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "env_tag=prod" >> $GITHUB_OUTPUT
-            echo "api_url=https://api.crackncet.com" >> $GITHUB_OUTPUT
-          else
-            echo "env_tag=dev" >> $GITHUB_OUTPUT
-            echo "api_url=https://api-dev.crackncet.com" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Build and Push Frontend Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./web
-          push: true
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ steps.vars.outputs.api_url }}
-          tags: ghcr.io/${{ github.repository }}/frontend-${{ steps.vars.outputs.env_tag }}:latest
-
-  # ────────────────────────────────────────────────────────
-  # STAGE 2: DEPLOY TO DEVELOPMENT (Runs on push to development branch)
-  # ────────────────────────────────────────────────────────
-  deploy-dev:
-    name: Deploy to Dev
-    needs: build-and-push
-    if: github.ref_name == 'development'
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Deploy to EC2 (Dev Frontend)
+      - name: SSH and Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            cd /home/ubuntu/crackncet/web
+            git pull origin main
             cd /home/ubuntu/crackncet
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull dev-frontend
-            docker compose up -d dev-frontend
-            docker image prune -f
-
-  # ────────────────────────────────────────────────────────
-  # STAGE 3: DEPLOY TO PRODUCTION (Runs on push to main branch with approval gate)
-  # ────────────────────────────────────────────────────────
-  deploy-prod:
-    name: Deploy to Prod (Approval Required)
-    needs: build-and-push
-    if: github.ref_name == 'main'
-    runs-on: ubuntu-latest
-    environment: production # 👈 Triggers manual review gate in GitHub Settings
-
-    steps:
-      - name: Deploy to EC2 (Prod Frontend)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/crackncet
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull prod-frontend
-            docker compose up -d prod-frontend
+            docker compose up -d --build prod-frontend
             docker image prune -f
