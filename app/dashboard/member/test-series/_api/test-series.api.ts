@@ -137,6 +137,9 @@ export async function addMemberSubjectsFaculty(
 export interface TestSubject {
   subjectId: string;
   subjectName: string;
+  sectionId: string | null;
+  maxQuestionsToAttempt: number | null;
+  isOptional: boolean;
   questionBank: {
     id: string;
     title: string;
@@ -165,11 +168,16 @@ export async function addMemberQuestionBank(
   testSeriesId: string,
   testId: string,
   subjectId: string,
-  questionBankId: string
+  data: {
+    questionBankId: string;
+    sectionId?: string | null;
+    maxQuestionsToAttempt?: number | null;
+    isOptional?: boolean;
+  }
 ) {
   const response = await apiClient.post<ApiSuccessResponse<null>>(
     `/test-series/${testSeriesId}/tests/${testId}/subjects/${subjectId}/addQuestionBank`,
-    { questionBankId }
+    data
   );
   return response.data;
 }
@@ -187,6 +195,59 @@ export async function getLibraryQuestionBanks(subjectId: string, search?: string
   const response = await apiClient.get<ApiSuccessResponse<LibraryQuestionBank[]>>(
     "/library/question-banks",
     { params }
+  );
+  return response.data;
+}
+
+export interface TestSection {
+  id: string;
+  testId: string;
+  name: string;
+  sequence: number;
+  rules: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getMemberTestSections(testSeriesId: string, testId: string) {
+  const response = await apiClient.get<ApiSuccessResponse<TestSection[]>>(
+    `/test-series/${testSeriesId}/tests/${testId}/sections`
+  );
+  return response.data;
+}
+
+export async function createMemberTestSection(
+  testSeriesId: string,
+  testId: string,
+  data: { name: string; sequence: number }
+) {
+  const response = await apiClient.post<ApiSuccessResponse<TestSection>>(
+    `/test-series/${testSeriesId}/tests/${testId}/sections`,
+    data
+  );
+  return response.data;
+}
+
+export async function updateMemberTestSection(
+  testSeriesId: string,
+  testId: string,
+  sectionId: string,
+  data: { name?: string; sequence?: number }
+) {
+  const response = await apiClient.put<ApiSuccessResponse<TestSection>>(
+    `/test-series/${testSeriesId}/tests/${testId}/sections/${sectionId}`,
+    data
+  );
+  return response.data;
+}
+
+export async function deleteMemberTestSection(
+  testSeriesId: string,
+  testId: string,
+  sectionId: string
+) {
+  const response = await apiClient.delete<ApiSuccessResponse<TestSection>>(
+    `/test-series/${testSeriesId}/tests/${testId}/sections/${sectionId}`
   );
   return response.data;
 }

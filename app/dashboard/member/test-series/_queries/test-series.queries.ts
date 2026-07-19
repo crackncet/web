@@ -9,6 +9,10 @@ import {
   addMemberQuestionBank,
   getLibraryQuestionBanks,
   ListTestSeriesQuery,
+  getMemberTestSections,
+  createMemberTestSection,
+  updateMemberTestSection,
+  deleteMemberTestSection,
 } from "../_api/test-series.api";
 import { toast } from "sonner";
 
@@ -106,12 +110,24 @@ export function useAddMemberQuestionBankMutation() {
       testId,
       subjectId,
       questionBankId,
+      sectionId,
+      maxQuestionsToAttempt,
+      isOptional,
     }: {
       testSeriesId: string;
       testId: string;
       subjectId: string;
       questionBankId: string;
-    }) => addMemberQuestionBank(testSeriesId, testId, subjectId, questionBankId),
+      sectionId?: string | null;
+      maxQuestionsToAttempt?: number | null;
+      isOptional?: boolean;
+    }) =>
+      addMemberQuestionBank(testSeriesId, testId, subjectId, {
+        questionBankId,
+        sectionId,
+        maxQuestionsToAttempt,
+        isOptional,
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: MEMBER_TEST_SERIES_QUERY_KEYS.testSubjects(variables.testSeriesId, variables.testId),
@@ -120,6 +136,96 @@ export function useAddMemberQuestionBankMutation() {
     },
     onError: (error: any) => {
       const message = error instanceof Error ? error.message : "Failed to attach question bank";
+      toast.error(message);
+    },
+  });
+}
+
+export function useMemberTestSectionsQuery(testSeriesId: string, testId: string) {
+  return useQuery({
+    queryKey: ["memberTestSections", testSeriesId, testId],
+    queryFn: () => getMemberTestSections(testSeriesId, testId),
+    enabled: !!testSeriesId && !!testId,
+    staleTime: 5000,
+  });
+}
+
+export function useCreateMemberTestSectionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      testSeriesId,
+      testId,
+      name,
+      sequence,
+    }: {
+      testSeriesId: string;
+      testId: string;
+      name: string;
+      sequence: number;
+    }) => createMemberTestSection(testSeriesId, testId, { name, sequence }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["memberTestSections", variables.testSeriesId, variables.testId],
+      });
+      toast.success("Test section created successfully");
+    },
+    onError: (error: any) => {
+      const message = error instanceof Error ? error.message : "Failed to create test section";
+      toast.error(message);
+    },
+  });
+}
+
+export function useUpdateMemberTestSectionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      testSeriesId,
+      testId,
+      sectionId,
+      name,
+      sequence,
+    }: {
+      testSeriesId: string;
+      testId: string;
+      sectionId: string;
+      name?: string;
+      sequence?: number;
+    }) => updateMemberTestSection(testSeriesId, testId, sectionId, { name, sequence }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["memberTestSections", variables.testSeriesId, variables.testId],
+      });
+      toast.success("Test section updated successfully");
+    },
+    onError: (error: any) => {
+      const message = error instanceof Error ? error.message : "Failed to update test section";
+      toast.error(message);
+    },
+  });
+}
+
+export function useDeleteMemberTestSectionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      testSeriesId,
+      testId,
+      sectionId,
+    }: {
+      testSeriesId: string;
+      testId: string;
+      sectionId: string;
+    }) => deleteMemberTestSection(testSeriesId, testId, sectionId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["memberTestSections", variables.testSeriesId, variables.testId],
+      });
+      toast.success("Test section deleted successfully");
+    },
+    onError: (error: any) => {
+      const message = error instanceof Error ? error.message : "Failed to delete test section";
       toast.error(message);
     },
   });

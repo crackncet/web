@@ -10,6 +10,10 @@ import {
   useMemberTestSubjectsQuery,
   useLibraryQuestionBanksQuery,
   useAddMemberQuestionBankMutation,
+  useMemberTestSectionsQuery,
+  useCreateMemberTestSectionMutation,
+  useUpdateMemberTestSectionMutation,
+  useDeleteMemberTestSectionMutation,
 } from "../../../_queries/test-series.queries";
 import { MemberHeader } from "../../../../layout";
 import { Button } from "@/components/ui/button";
@@ -27,6 +31,12 @@ import {
   Check,
   Loader2,
   Search,
+  Plus,
+  Trash2,
+  Edit3,
+  Settings,
+  Save,
+  LayoutGrid,
 } from "lucide-react";
 import {
   Table,
@@ -82,10 +92,39 @@ export default function MemberTestDetailPage() {
 
   const isLoading = isDetailLoading || isTestsLoading || isSubjectsLoading;
 
-  const handleOpenAttachModal = (subjectId: string, subjectName: string, currentBankId: string | null) => {
+  const { data: sectionsResponse } = useMemberTestSectionsQuery(testSeriesId, testId);
+  const sections = sectionsResponse?.data || [];
+
+  const createSectionMutation = useCreateMemberTestSectionMutation();
+  const updateSectionMutation = useUpdateMemberTestSectionMutation();
+  const deleteSectionMutation = useDeleteMemberTestSectionMutation();
+
+  // Section CRUD input state
+  const [newSectionName, setNewSectionName] = useState("");
+  const [newSectionSequence, setNewSectionSequence] = useState(1);
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingSectionName, setEditingSectionName] = useState("");
+  const [editingSectionSequence, setEditingSectionSequence] = useState(1);
+
+  // Attach modal rule configuration states
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [maxQuestionsInput, setMaxQuestionsInput] = useState<string>("");
+  const [isOptionalInput, setIsOptionalInput] = useState<boolean>(false);
+
+  const handleOpenAttachModal = (
+    subjectId: string,
+    subjectName: string,
+    currentBankId: string | null,
+    currentSectionId: string | null,
+    currentMaxQuestions: number | null,
+    currentIsOptional: boolean
+  ) => {
     setActiveSubjectId(subjectId);
     setActiveSubjectName(subjectName);
     setSelectedBankId(currentBankId);
+    setSelectedSectionId(currentSectionId);
+    setMaxQuestionsInput(currentMaxQuestions !== null ? String(currentMaxQuestions) : "");
+    setIsOptionalInput(currentIsOptional);
     setSearchText("");
     setSearchQueryParam("");
     setIsModalOpen(true);
@@ -97,18 +136,26 @@ export default function MemberTestDetailPage() {
       return;
     }
 
+    const maxQuestionsVal = maxQuestionsInput.trim() ? parseInt(maxQuestionsInput, 10) : null;
+
     attachMutation.mutate(
       {
         testSeriesId,
         testId,
         subjectId: activeSubjectId,
         questionBankId: selectedBankId,
+        sectionId: selectedSectionId || null,
+        maxQuestionsToAttempt: maxQuestionsVal,
+        isOptional: isOptionalInput,
       },
       {
         onSuccess: () => {
           setIsModalOpen(false);
           setActiveSubjectId(null);
           setSelectedBankId(null);
+          setSelectedSectionId(null);
+          setMaxQuestionsInput("");
+          setIsOptionalInput(false);
         },
       }
     );
@@ -216,6 +263,215 @@ export default function MemberTestDetailPage() {
         </div>
       </Card>
 
+      {/* Test Sections Manager */}
+      <Card className="rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 select-none space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-3">
+          <div className="flex items-center gap-2">
+            <LayoutGrid className="h-5 w-5 text-indigo-500" />
+            <div>
+              <h3 className="text-sm font-black text-slate-850 dark:text-slate-200">
+                Test Sections
+              </h3>
+              <p className="text-[10px] text-muted-foreground">
+                Group subjects into named exam sections (e.g. Physics, Chemistry, Teaching Aptitude) and set rules.
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+            {sections.length} Sections
+          </span>
+        </div>
+
+        {/* Section CRUD Forms & List */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-1">
+          {/* Add Section Form */}
+          <div className="md:col-span-1 space-y-3 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-955/10 border border-slate-100 dark:border-slate-800/40">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Create New Section
+            </h4>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">
+                  Section Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Domain Subject: Physics"
+                  value={newSectionName}
+                  onChange={(e) => setNewSectionName(e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-205 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">
+                  Sequence / Order
+                </label>
+                <input
+                  type="number"
+                  placeholder="1"
+                  value={newSectionSequence}
+                  onChange={(e) => setNewSectionSequence(parseInt(e.target.value, 10) || 1)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-205 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  if (!newSectionName.trim()) {
+                    toast.error("Please enter a section name");
+                    return;
+                  }
+                  createSectionMutation.mutate(
+                    {
+                      testSeriesId,
+                      testId,
+                      name: newSectionName.trim(),
+                      sequence: newSectionSequence,
+                    },
+                    {
+                      onSuccess: () => {
+                        setNewSectionName("");
+                        setNewSectionSequence(1);
+                      },
+                    }
+                  );
+                }}
+                disabled={createSectionMutation.isPending}
+                className="w-full text-xs font-bold h-9 rounded-xl cursor-pointer"
+              >
+                {createSectionMutation.isPending ? "Creating..." : "Add Section"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Sections List */}
+          <div className="md:col-span-2 space-y-2">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Existing Sections
+            </h4>
+
+            {sections.length === 0 ? (
+              <div className="text-center py-10 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/10 text-muted-foreground text-xs">
+                No sections defined for this test. All attached papers will be treated as part of the default exam flow.
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                {sections.map((sec) => {
+                  const isEditing = editingSectionId === sec.id;
+                  return (
+                    <div
+                      key={sec.id}
+                      className="flex items-center justify-between p-3.5 rounded-xl border border-slate-150 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:bg-slate-50/30 dark:hover:bg-slate-955/5 transition-all duration-200"
+                    >
+                      {isEditing ? (
+                        <div className="flex-1 flex gap-2 mr-4">
+                          <input
+                            type="text"
+                            value={editingSectionName}
+                            onChange={(e) => setEditingSectionName(e.target.value)}
+                            className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-transparent text-slate-800 dark:text-slate-100"
+                          />
+                          <input
+                            type="number"
+                            value={editingSectionSequence}
+                            onChange={(e) => setEditingSectionSequence(parseInt(e.target.value, 10) || 1)}
+                            className="w-16 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 bg-transparent text-slate-800 dark:text-slate-100"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="h-6 w-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-black flex items-center justify-center">
+                            {sec.sequence}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {sec.name}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5">
+                        {isEditing ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (!editingSectionName.trim()) {
+                                  toast.error("Please enter a section name");
+                                  return;
+                                }
+                                updateSectionMutation.mutate(
+                                  {
+                                    testSeriesId,
+                                    testId,
+                                    sectionId: sec.id,
+                                    name: editingSectionName.trim(),
+                                    sequence: editingSectionSequence,
+                                  },
+                                  {
+                                    onSuccess: () => setEditingSectionId(null),
+                                  }
+                                );
+                              }}
+                              disabled={updateSectionMutation.isPending}
+                              className="h-8 w-8 p-0 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingSectionId(null)}
+                              className="h-8 w-8 p-0 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-500/10"
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingSectionId(sec.id);
+                                setEditingSectionName(sec.name);
+                                setEditingSectionSequence(sec.sequence);
+                              }}
+                              className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-500/10"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete section "${sec.name}"?`)) {
+                                  deleteSectionMutation.mutate({
+                                    testSeriesId,
+                                    testId,
+                                    sectionId: sec.id,
+                                  });
+                                }
+                              }}
+                              disabled={deleteSectionMutation.isPending}
+                              className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
+
       {/* Subjects & Question Papers Table */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-850 dark:text-slate-200 tracking-wider uppercase select-none flex items-center gap-2">
@@ -249,6 +505,9 @@ export default function MemberTestDetailPage() {
                   </TableHead>
                   <TableHead className="font-bold text-[10px] uppercase text-slate-400 tracking-wider h-10 px-4">
                     Question Paper Title
+                  </TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase text-slate-400 tracking-wider h-10 px-4">
+                    Section & Rules
                   </TableHead>
                   <TableHead className="font-bold text-[10px] uppercase text-slate-400 tracking-wider h-10 px-4 text-right">
                     Actions
@@ -301,13 +560,46 @@ export default function MemberTestDetailPage() {
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate max-w-xs">
                               {sub.questionBank.title}
                             </span>
-                            
                           </div>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[10px] text-rose-500 font-semibold bg-rose-500/5 px-2 py-0.5 rounded border border-rose-500/10">
                             <AlertCircle className="h-3 w-3 shrink-0" />
                             No paper attached
                           </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="align-middle px-4 py-3.5">
+                        {sub.questionBank ? (
+                          <div className="flex flex-col gap-1">
+                            {sub.sectionId ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 w-fit">
+                                <LayoutGrid className="h-3 w-3 shrink-0" />
+                                {sections.find((s) => s.id === sub.sectionId)?.name || "Unknown Section"}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground font-medium italic">
+                                No Section (Legacy)
+                              </span>
+                            )}
+                            <div className="flex flex-wrap gap-1.5 mt-0.5">
+                              {sub.maxQuestionsToAttempt !== null ? (
+                                <span className="inline-flex px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                                  Max Attempt: {sub.maxQuestionsToAttempt} Qs
+                                </span>
+                              ) : (
+                                <span className="inline-flex px-1.5 py-0.2 rounded bg-slate-500/10 text-slate-600 dark:text-slate-400 text-[9px] font-black uppercase tracking-wider">
+                                  All Questions
+                                </span>
+                              )}
+                              {sub.isOptional && (
+                                <span className="inline-flex px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[9px] font-black uppercase tracking-wider">
+                                  Optional
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </TableCell>
                       <TableCell className="align-middle px-4 py-3.5 text-right">
@@ -318,7 +610,14 @@ export default function MemberTestDetailPage() {
                               size="sm"
                               variant="outline"
                               onClick={() =>
-                                handleOpenAttachModal(sub.subjectId, sub.subjectName, sub.questionBank?.id || null)
+                                handleOpenAttachModal(
+                                  sub.subjectId,
+                                  sub.subjectName,
+                                  sub.questionBank?.id || null,
+                                  sub.sectionId,
+                                  sub.maxQuestionsToAttempt,
+                                  sub.isOptional
+                                )
                               }
                               className="text-xs font-bold h-8 rounded-lg cursor-pointer border-slate-200 dark:border-slate-800 hover:text-primary select-none"
                             >
@@ -375,7 +674,7 @@ export default function MemberTestDetailPage() {
                   setSearchQueryParam(searchText);
                 }
               }}
-              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
+              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-205 dark:border-slate-800 bg-transparent text-slate-850 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
             />
             <Button
               type="button"
@@ -408,7 +707,7 @@ export default function MemberTestDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2 max-h-[35vh] overflow-y-auto pr-1 animate-in fade-in duration-200">
+              <div className="flex flex-col gap-2 max-h-[25vh] overflow-y-auto pr-1 animate-in fade-in duration-200">
                 {questionBanks.map((bank) => {
                   const isSelected = selectedBankId === bank.id;
                   return (
@@ -437,6 +736,64 @@ export default function MemberTestDetailPage() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Rules Configuration */}
+          <div className="space-y-4 my-2 border-t border-slate-100 dark:border-slate-800/60 pt-4">
+            <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase block">
+              Section & Attempt Rules
+            </span>
+
+            {/* Section dropdown select */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-350">
+                Assigned Section
+              </label>
+              <select
+                value={selectedSectionId || ""}
+                onChange={(e) => setSelectedSectionId(e.target.value || null)}
+                className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-850 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary"
+              >
+                <option value="">No Section (Unassigned)</option>
+                {sections.map((sec) => (
+                  <option key={sec.id} value={sec.id}>
+                    {sec.name} (Seq: {sec.sequence})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Max Questions to Attempt */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-350">
+                Max Questions to Attempt
+              </label>
+              <input
+                type="number"
+                placeholder="Leave blank for unlimited (attempt all)"
+                value={maxQuestionsInput}
+                onChange={(e) => setMaxQuestionsInput(e.target.value)}
+                min="1"
+                className="w-full text-xs px-3 py-2 rounded-xl border border-slate-205 dark:border-slate-800 bg-transparent text-slate-850 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Maximum number of questions a student can submit in this subject slot. Exceeded submissions are ignored.
+              </p>
+            </div>
+
+            {/* Is Optional Checkbox */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="isOptional"
+                checked={isOptionalInput}
+                onChange={(e) => setIsOptionalInput(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+              />
+              <label htmlFor="isOptional" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                Is Optional Subject / Paper slot
+              </label>
+            </div>
           </div>
 
           <DialogFooter className="pt-4 gap-2 sm:gap-0">

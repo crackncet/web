@@ -97,6 +97,8 @@ export interface CbtQuestion {
   sequence: number;
   sectionId: string | null;
   bankId: string;
+  maxQuestionsToAttempt: number | null;
+  isOptional: boolean;
   options: CbtOption[];
   solution?: CbtSolution | null;
 }

@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CbtLayout } from "@/components/cbt/_components/cbt-layout";
 import { QuestionCard } from "@/components/cbt/_components/question-card";
+import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,8 @@ interface ParsedQuestion {
   numMin: string | null;
   numMax: string | null;
   sectionId?: string;
+  maxQuestionsToAttempt?: number | null;
+  isOptional?: boolean;
 }
 
 // ─── Subjects Configuration ──────────────────────────────────────────────────
@@ -64,6 +67,7 @@ const SUBJECTS = [
     color: "from-blue-500/20 to-indigo-500/10 border-blue-500/20 hover:border-blue-500/40 text-blue-600 dark:text-blue-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "chemistry",
@@ -73,6 +77,7 @@ const SUBJECTS = [
     color: "from-teal-500/20 to-emerald-500/10 border-teal-500/20 hover:border-teal-500/40 text-teal-600 dark:text-teal-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "mathematics",
@@ -82,6 +87,7 @@ const SUBJECTS = [
     color: "from-violet-500/20 to-purple-500/10 border-violet-500/20 hover:border-violet-500/40 text-violet-600 dark:text-violet-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "biology",
@@ -91,6 +97,7 @@ const SUBJECTS = [
     color: "from-green-500/20 to-emerald-500/10 border-green-500/20 hover:border-green-500/40 text-green-600 dark:text-green-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "english",
@@ -100,6 +107,7 @@ const SUBJECTS = [
     color: "from-amber-500/20 to-orange-500/10 border-amber-500/20 hover:border-amber-500/40 text-amber-600 dark:text-amber-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "hindi",
@@ -109,6 +117,7 @@ const SUBJECTS = [
     color: "from-rose-500/20 to-pink-500/10 border-rose-500/20 hover:border-rose-500/40 text-rose-600 dark:text-rose-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "teaching-aptitude",
@@ -118,6 +127,7 @@ const SUBJECTS = [
     color: "from-cyan-500/20 to-blue-500/10 border-cyan-500/20 hover:border-cyan-500/40 text-cyan-600 dark:text-cyan-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
   {
     id: "general-aptitude",
@@ -127,6 +137,7 @@ const SUBJECTS = [
     color: "from-orange-500/20 to-rose-500/10 border-orange-500/20 hover:border-orange-500/40 text-orange-600 dark:text-orange-400",
     questionsCount: 10,
     timeLimit: 15,
+    maxQuestionsToAttempt: 8,
   },
 ];
 
@@ -389,12 +400,14 @@ export default function PublicSampleTestPage() {
           allSections.push({
             id: secId,
             title: res.subject.title,
+            sequence: sIdx,
           });
 
           const updatedQuestions = res.questions.map((q, qIdx) => ({
             ...q,
             id: `full-${res.subject.id}-${q.id}`,
             sectionId: secId,
+            maxQuestionsToAttempt: res.subject.maxQuestionsToAttempt || null,
             options: q.options.map((opt) => ({
               ...opt,
               id: `full-${res.subject.id}-${opt.id}`,
@@ -429,6 +442,7 @@ export default function PublicSampleTestPage() {
         const updatedQuestions = parsed.map((q) => ({
           ...q,
           sectionId: secId,
+          maxQuestionsToAttempt: selectedSubject.maxQuestionsToAttempt || null,
         }));
 
         setQuestions(updatedQuestions);
@@ -436,6 +450,7 @@ export default function PublicSampleTestPage() {
           {
             id: secId,
             title: selectedSubject.title,
+            sequence: 0,
           },
         ]);
 
@@ -459,10 +474,39 @@ export default function PublicSampleTestPage() {
     }
   };
 
+  const getAttemptCount = (targetSectionId: string | null, excludeQuestionId: string) => {
+    let count = 0;
+    questions.forEach((q) => {
+      if (q.id === excludeQuestionId) return;
+      if (q.sectionId === targetSectionId) {
+        const resp = responses[q.id];
+        if (resp && (resp.selectedOptionIds.length > 0 || resp.numericAnswer !== null)) {
+          count++;
+        }
+      }
+    });
+    return count;
+  };
+
   // 4. Handle attempt interactions
   const handleChangeResponse = (selectedIds: string[], numValue: string | null) => {
     if (!questions[currentIndex]) return;
     const activeQuestion = questions[currentIndex];
+
+    // Check if we are answering a new question or updating an existing one
+    const previousResp = responses[activeQuestion.id];
+    const hadAnswer = previousResp && (previousResp.selectedOptionIds.length > 0 || previousResp.numericAnswer !== null);
+    const isNewAnswer = (selectedIds.length > 0 || numValue !== null) && !hadAnswer;
+
+    if (isNewAnswer && activeQuestion.maxQuestionsToAttempt !== undefined && activeQuestion.maxQuestionsToAttempt !== null) {
+      const currentAttemptCount = getAttemptCount(activeQuestion.sectionId || null, activeQuestion.id);
+      if (currentAttemptCount >= activeQuestion.maxQuestionsToAttempt) {
+        toast.error(
+          `Limit Reached: You can attempt a maximum of ${activeQuestion.maxQuestionsToAttempt} questions in this section.`
+        );
+        return;
+      }
+    }
 
     setResponses((prev) => {
       const currentResp = prev[activeQuestion.id] || {
@@ -821,9 +865,9 @@ export default function PublicSampleTestPage() {
               <li>You can click "Mark for Review" to star a question and return to it later from the Navigator.</li>
               <li>Make sure to click "Save and Next" to record your response before proceeding.</li>
               {isMock ? (
-                <li className="text-rose-500 font-bold">In Test Mode, a flat list of questions is rendered, and strict authoritative time limits are applied.</li>
+                <li className="text-rose-500 font-bold">In Test Mode, questions are structured in sections. A strict limit of 8 questions attempted per subject/section is enforced, alongside an authoritative countdown timer.</li>
               ) : (
-                <li className="text-emerald-600 font-bold">In Practice Mode, questions are grouped by subjects in the Navigator panel for targeted training.</li>
+                <li className="text-emerald-600 font-bold">In Practice Mode, questions are grouped by subjects for targeted training without time limits. An attempt limit of 8 questions per section still applies to mimic the real exam rules.</li>
               )}
             </ul>
           </div>

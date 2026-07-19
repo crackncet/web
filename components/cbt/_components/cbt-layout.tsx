@@ -73,7 +73,7 @@ export function CbtLayout({
 
   const totalQuestions = questions.length;
   const isReportMode = mode === "REPORT";
-  const activeSections = mode === "TEST" ? [] : sections;
+  const activeSections = sections;
 
   const handlePrev = () => {
     if (currentIndex > 0) {

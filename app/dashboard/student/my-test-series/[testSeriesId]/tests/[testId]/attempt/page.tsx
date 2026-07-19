@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Loader2, AlertCircle, Play, ShieldAlert, Award, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CbtLayout } from "@/components/cbt/_components/cbt-layout";
@@ -301,9 +302,45 @@ export default function CbtAttemptPage() {
     }
   };
 
+  const getAttemptCount = (targetSectionId: string | null, targetBankId: string) => {
+    let count = 0;
+    if (!localState) return 0;
+
+    questions.forEach((q) => {
+      if (q.id === activeQuestion?.id) return;
+
+      const isSameGroup = targetSectionId
+        ? q.sectionId === targetSectionId
+        : q.bankId === targetBankId;
+
+      if (isSameGroup) {
+        const resp = localState.responses[q.id];
+        if (resp && (resp.selectedOptionIds.length > 0 || resp.numericAnswer !== null)) {
+          count++;
+        }
+      }
+    });
+    return count;
+  };
+
   // 6. Handle Response change inside QuestionCard
   const handleChangeResponse = (selectedIds: string[], numValue: string | null) => {
     if (!localState || !activeQuestion || isAutoSubmitting) return;
+
+    // Check if we are answering a new question or updating an existing one
+    const previousResp = localState.responses[activeQuestion.id];
+    const hadAnswer = previousResp && (previousResp.selectedOptionIds.length > 0 || previousResp.numericAnswer !== null);
+    const isNewAnswer = (selectedIds.length > 0 || numValue !== null) && !hadAnswer;
+
+    if (isNewAnswer && activeQuestion.maxQuestionsToAttempt !== null) {
+      const currentAttemptCount = getAttemptCount(activeQuestion.sectionId, activeQuestion.bankId);
+      if (currentAttemptCount >= activeQuestion.maxQuestionsToAttempt) {
+        toast.error(
+          `Limit Reached: You can attempt a maximum of ${activeQuestion.maxQuestionsToAttempt} questions in this section.`
+        );
+        return;
+      }
+    }
 
     setLocalState((prev) => {
       if (!prev) return null;
