@@ -13,6 +13,7 @@ export interface TestSeries {
   isActive: boolean;
   isPublished: boolean;
   isEnrollmentOpen: boolean;
+  instructions?: string | null;
   createdAt: string;
   updatedAt: string;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "UNPUBLISHED";
@@ -39,6 +40,7 @@ export interface CreateTestSeriesInput {
   endDate?: string;
   isPublished?: boolean;
   isEnrollmentOpen?: boolean;
+  instructions?: string;
   streamId: string[];
 }
 
@@ -76,6 +78,7 @@ export interface UpdateTestSeriesInput {
   isActive?: boolean;
   isPublished?: boolean;
   isEnrollmentOpen?: boolean;
+  instructions?: string | null;
   streamId?: string[];
 }
 
@@ -115,6 +118,7 @@ export interface TestSeriesTest {
   description: string | null;
   scheduledAt: string | null;
   durationMinutes: number | null;
+  instructions: string | null;
 }
 
 export interface CreateTestsInput {
@@ -123,7 +127,24 @@ export interface CreateTestsInput {
     description?: string;
     scheduledAt: string; // ISO date string
     durationMinutes: number;
+    instructions?: string | null;
   }[];
+}
+
+export interface UpdateTestInput {
+  name?: string;
+  description?: string | null;
+  scheduledAt?: string;
+  durationMinutes?: number;
+  instructions?: string | null;
+}
+
+export async function updateTest(testSeriesId: string, testId: string, data: UpdateTestInput) {
+  const response = await apiClient.patch<ApiSuccessResponse<TestSeriesTest>>(
+    `/test-series/${testSeriesId}/tests/${testId}`,
+    data
+  );
+  return response.data;
 }
 
 export async function getTestSeriesDetail(testSeriesId: string) {

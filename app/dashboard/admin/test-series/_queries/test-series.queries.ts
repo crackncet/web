@@ -14,6 +14,8 @@ import {
   getFeaturedTestSeries,
   featureTestSeries,
   unfeatureTestSeries,
+  updateTest,
+  UpdateTestInput,
 } from "../_api/test-series.api";
 import { toast } from "sonner";
 
@@ -146,6 +148,23 @@ export function useUnfeatureTestSeriesMutation() {
     },
     onError: (error: any) => {
       const message = error?.response?.data?.message || error.message || "Failed to unfeature test series";
+      toast.error(message);
+    },
+  });
+}
+
+export function useUpdateTestMutation(testSeriesId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ testId, data }: { testId: string; data: UpdateTestInput }) =>
+      updateTest(testSeriesId, testId, data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: [...TEST_SERIES_QUERY_KEYS.all, "tests", testSeriesId] });
+      toast.success("Test updated successfully");
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error.message || "Failed to update test";
       toast.error(message);
     },
   });

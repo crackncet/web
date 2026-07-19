@@ -592,32 +592,38 @@ export default function CbtAttemptPage() {
             </div>
 
             {/* Instruction body */}
-            <div className="space-y-4 text-xs text-muted-foreground leading-relaxed divide-y divide-border/60 pt-2">
-              <div className="space-y-2 pb-4">
-                <h3 className="font-bold text-foreground text-sm">Exam Overview:</h3>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li>This test series has server-authoritative timing. Once you click "Start Exam", your timer begins.</li>
-                  <li>Closing the window or losing network connection does not pause your timer.</li>
-                  <li>The exam will automatically submit the moment the timer reaches 0.</li>
-                </ul>
+            {clockSync?.instructions ? (
+              <div className="space-y-4 text-xs text-muted-foreground leading-relaxed pt-2 whitespace-pre-wrap overflow-y-auto max-h-[300px] pr-2">
+                {clockSync.instructions}
               </div>
+            ) : (
+              <div className="space-y-4 text-xs text-muted-foreground leading-relaxed divide-y divide-border/60 pt-2">
+                <div className="space-y-2 pb-4">
+                  <h3 className="font-bold text-foreground text-sm">Exam Overview:</h3>
+                  <ul className="list-disc pl-5 space-y-1.5">
+                    <li>This test series has server-authoritative timing. Once you click "Start Exam", your timer begins.</li>
+                    <li>Closing the window or losing network connection does not pause your timer.</li>
+                    <li>The exam will automatically submit the moment the timer reaches 0.</li>
+                  </ul>
+                </div>
 
-              <div className="space-y-2 py-4">
-                <h3 className="font-bold text-foreground text-sm">Security & Integrity:</h3>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li>Answers are saved and synced to the cloud continuously in real-time.</li>
-                  <li>Do not open multiple tabs, refresh unnecessarily, or attempt to modify local state.</li>
-                  <li>Any suspicious activity may disqualify your attempt.</li>
-                </ul>
-              </div>
+                <div className="space-y-2 py-4">
+                  <h3 className="font-bold text-foreground text-sm">Security & Integrity:</h3>
+                  <ul className="list-disc pl-5 space-y-1.5">
+                    <li>Answers are saved and synced to the cloud continuously in real-time.</li>
+                    <li>Do not open multiple tabs, refresh unnecessarily, or attempt to modify local state.</li>
+                    <li>Any suspicious activity may disqualify your attempt.</li>
+                  </ul>
+                </div>
 
-              <div className="space-y-2 pt-4">
-                <h3 className="font-bold text-foreground text-sm">Marking Scheme:</h3>
-                <p>
-                  Review the marks displayed on each question. Multiple correct answers (MCQ_M) might award partial marks if configured. Incorrect responses can attract negative markings.
-                </p>
+                <div className="space-y-2 pt-4">
+                  <h3 className="font-bold text-foreground text-sm">Marking Scheme:</h3>
+                  <p>
+                    Review the marks displayed on each question. Multiple correct answers (MCQ_M) might award partial marks if configured. Incorrect responses can attract negative markings.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-border">
               <Button

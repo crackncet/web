@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTestSeriesTestsQuery } from "../../_queries/test-series.queries";
 import { TestSeriesDetail } from "../../_api/test-series.api";
 import { AddTestsDialog } from "./add-tests-dialog";
+import { EditTestDialog } from "./edit-test-dialog";
 import {
   FileText,
   Calendar,
@@ -133,6 +134,9 @@ export function TestsListSection({
                   <TableHead className="font-bold text-[10px] uppercase text-slate-400 tracking-wider h-10 px-4 text-right">
                     Status
                   </TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase text-slate-400 tracking-wider h-10 px-4 text-right">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,6 +182,9 @@ export function TestsListSection({
                         >
                           {testStatus}
                         </span>
+                      </TableCell>
+                      <TableCell className="align-middle px-4 py-3.5 text-right">
+                        <EditTestDialog testSeriesId={testSeriesId} test={test} />
                       </TableCell>
                     </TableRow>
                   );

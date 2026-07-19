@@ -145,6 +145,7 @@ export interface CbtClockSyncPayload {
   startsAt: string | null;
   endsAt: string | null;
   durationMinutes: number;
+  instructions: string | null;
 }
 
 /**

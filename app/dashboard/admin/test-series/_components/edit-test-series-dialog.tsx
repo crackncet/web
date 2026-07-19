@@ -48,6 +48,7 @@ const testSeriesFormSchema = z.object({
   isActive: z.boolean().optional(),
   isPublished: z.boolean().optional(),
   isEnrollmentOpen: z.boolean().optional(),
+  instructions: z.string().optional(),
 });
 
 type TestSeriesFormInput = z.infer<typeof testSeriesFormSchema>;
@@ -106,6 +107,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
       isActive: false,
       isPublished: false,
       isEnrollmentOpen: false,
+      instructions: "",
     },
   });
 
@@ -124,6 +126,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
         isActive: testSeries.isActive,
         isPublished: testSeries.isPublished,
         isEnrollmentOpen: testSeries.isEnrollmentOpen ?? false,
+        instructions: testSeries.instructions || "",
       });
     }
   }, [testSeries, linkedStreamIds, open, form]);
@@ -154,6 +157,7 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
       isActive: data.isActive,
       isPublished: data.isPublished,
       isEnrollmentOpen: data.isEnrollmentOpen,
+      instructions: data.instructions || null,
     };
 
     updateMutation.mutate(
@@ -208,6 +212,19 @@ export function EditTestSeriesDialog({ testSeries, linkedStreamIds, children }: 
             />
             {form.formState.errors.description && (
               <FieldError>{form.formState.errors.description.message}</FieldError>
+            )}
+          </Field>
+
+          {/* Instructions */}
+          <Field>
+            <FieldLabel>Exam Instructions (Fallback guidelines for tests under this series)</FieldLabel>
+            <Textarea
+              placeholder="Instructions to display to students before commecing attempts..."
+              {...form.register("instructions")}
+              className="min-h-[90px] text-sm bg-muted/10 resize-none leading-relaxed"
+            />
+            {form.formState.errors.instructions && (
+              <FieldError>{form.formState.errors.instructions.message}</FieldError>
             )}
           </Field>
 

@@ -149,8 +149,11 @@ export default function StudentTestSeriesDetailPage() {
 
                     const scheduledTime = new Date(test.scheduledAt).getTime();
                     const nowTime = Date.now();
+                    const liveEndTime = scheduledTime + test.durationMinutes * 60 * 1000;
+                    
                     const canViewInstructions = scheduledTime - 5 * 60 * 1000 <= nowTime;
                     const isUpcoming = scheduledTime > nowTime;
+                    const isMissed = nowTime > liveEndTime + 2 * 60 * 1000 && !test.attemptStatus;
 
                     return (
                       <div
@@ -211,6 +214,15 @@ export default function StudentTestSeriesDetailPage() {
                                 className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4 border-primary text-primary hover:bg-primary/5"
                               >
                                 View Report
+                              </Button>
+                            </Link>
+                          ) : isMissed ? (
+                            <Link href={`/dashboard/student/my-test-series/${testSeriesId}/tests/${test.testId}/attempt`}>
+                              <Button
+                                className="text-xs font-bold gap-2 w-full sm:w-auto min-h-[40px] px-4 bg-emerald-600 hover:bg-emerald-600/90 text-white"
+                              >
+                                <Play className="h-3.5 w-3.5 fill-current" />
+                                Practice Test
                               </Button>
                             </Link>
                           ) : (

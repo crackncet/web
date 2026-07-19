@@ -54,6 +54,7 @@ const testSeriesFormSchema = z.object({
   examId: z.string().uuid("Please select an exam"),
   streamId: z.array(z.string().uuid()).min(1, "Select at least one stream"),
   isEnrollmentOpen: z.boolean().optional(),
+  instructions: z.string().optional(),
 });
 
 type TestSeriesFormInput = z.infer<typeof testSeriesFormSchema>;
@@ -100,6 +101,7 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
       examId: "",
       streamId: [],
       isEnrollmentOpen: false,
+      instructions: "",
     },
   });
 
@@ -127,6 +129,7 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
       examId: data.examId,
       streamId: data.streamId,
       isEnrollmentOpen: data.isEnrollmentOpen,
+      instructions: data.instructions || undefined,
     };
 
     createMutation.mutate(payload, {
@@ -184,6 +187,19 @@ export function CreateTestSeriesDialog({ children }: CreateTestSeriesDialogProps
             />
             {form.formState.errors.description && (
               <FieldError>{form.formState.errors.description.message}</FieldError>
+            )}
+          </Field>
+
+          {/* Instructions */}
+          <Field>
+            <FieldLabel>Exam Instructions (Fallback guidelines for tests under this series)</FieldLabel>
+            <Textarea
+              placeholder="Instructions to display to students before commecing attempts..."
+              {...form.register("instructions")}
+              className="min-h-[90px] text-sm bg-muted/10 resize-none leading-relaxed"
+            />
+            {form.formState.errors.instructions && (
+              <FieldError>{form.formState.errors.instructions.message}</FieldError>
             )}
           </Field>
 
